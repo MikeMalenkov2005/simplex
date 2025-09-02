@@ -1,0 +1,7 @@
+.vscode/
+compile_flags.txt
+*.img
+*.iso
+*.sys
+*.o
+

@@ -1,0 +1,23 @@
+#ifndef _TYPES_H
+#define _TYPES_H
+
+typedef unsigned char   K_U8;
+typedef unsigned short  K_U16;
+typedef unsigned int    K_U32;
+
+typedef signed char   K_S8;
+typedef signed short  K_S16;
+typedef signed int    K_S32;
+
+typedef unsigned long K_USIZE;
+typedef signed long   K_SSIZE;
+
+typedef void *K_HANDLE;
+typedef K_S32 K_RESULT;
+
+#ifndef NULL
+#define NULL ((void*)0)
+#endif
+
+#endif
+
