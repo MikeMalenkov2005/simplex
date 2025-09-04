@@ -95,11 +95,18 @@ struct K_BootTagMemoryMapEntry
   K_U32 Reserved;
 };
 
+typedef struct K_BootTagMemoryMapEntry K_BootTagMemoryMapEntry;
+
 #define K_BootTagMemoryMapFirstEntry(map)     ((K_BootTagMemoryMapEntry*)((map) + 1))
 #define K_BootTagMemoryMapNextEntry(map, ent) ((K_BootTagMemoryMapEntry*)((K_U8*)(ent) + (map)->EntrySize))
 #define K_BootTagMemoryMapIsValid(map, ent)   ((K_USIZE)(ent) - (K_USIZE)(map) < (map)->Tag.Size)
 #define K_BootTagMemoryMapForEach(map, ent) \
   for ((ent) = K_BootTagMemoryMapFirstEntry(map); K_BootTagMemoryMapIsValid(map, ent); (ent) = K_BootTagMemoryMapNextEntry(map, ent))
+
+#define K_BOOT_TAG_MEMORY_MAP_FREE      1
+#define K_BOOT_TAG_MEMORY_MAP_ACPI      3
+#define K_BOOT_TAG_MEMORY_MAP_PRESERVED 4
+#define K_BOOT_TAG_MEMORY_MAP_DEFECTIVE 5
 
 #endif
 

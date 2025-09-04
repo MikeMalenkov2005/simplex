@@ -65,7 +65,9 @@ ISR_Common:
   mov ax, ss
   mov ds, ax
   mov es, ax
+  push esp
   call IDT_Dispatch
+  pop esp
   mov eax, [esp+56]
   mov ds, ax
   mov es, ax

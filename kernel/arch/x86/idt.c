@@ -64,7 +64,9 @@ K_U16 (*IDT)[4];
 
 void IDT_Dispatch(ISR_Frame *frame)
 {
-  (void)frame;
+  if (frame->Index >= 32 && frame->Index < 48)
+  {
+  }
 }
 
 void IDT_SetEntry(K_U8 index, K_USIZE address, K_U16 selector, K_U8 access)

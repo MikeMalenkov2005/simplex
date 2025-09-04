@@ -13,7 +13,10 @@ typedef unsigned long K_USIZE;
 typedef signed long   K_SSIZE;
 
 typedef void *K_HANDLE;
-typedef K_S32 K_RESULT;
+typedef K_S32 K_BOOL;
+
+#define TRUE  1
+#define FALSE 0
 
 #ifndef NULL
 #define NULL ((void*)0)

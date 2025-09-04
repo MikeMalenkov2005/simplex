@@ -1,6 +1,13 @@
 [bits 32]
 
 global K_ZeroMemory
+global K_WritePort8
+global K_WritePort16
+global K_WritePort32
+global K_ReadPort8
+global K_ReadPort16
+global K_ReadPort32
+global K_GetCPUFlags
 
 section .text
 
@@ -47,5 +54,10 @@ K_ReadPort16:
 K_ReadPort32:
   mov edx, [esp + 4]
   in eax, dx
+  ret
+
+K_GetCPUFlags:
+  pushfd
+  pop eax
   ret
 

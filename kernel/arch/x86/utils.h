@@ -15,5 +15,7 @@ void K_ReadPort8(K_U16 port);
 void K_ReadPort16(K_U16 port);
 void K_ReadPort32(K_U16 port);
 
+K_U32 K_GetCPUFlags();
+
 #endif
 
