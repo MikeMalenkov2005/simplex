@@ -40,11 +40,11 @@ K_BOOL K_ChangePage(K_HANDLE address, K_U16 flags)
   {
     if (K_IsPageCommited(page) && !K_IsPageCommited(flags))
     {
-      return K_FreePage(address) && K_SetPage(address, flags); /* Commit page */
+      return K_FreePage(address) && K_SetPage(address, flags); /* Decommit page */
     }
     if (!K_IsPageCommited(page) && K_IsPageCommited(flags))
     {
-      return K_SetPage(address, 0) && K_AllocatePage(address, flags); /* Decommit page */
+      return K_SetPage(address, 0) && K_AllocatePage(address, flags); /* Commit page */
     }
   }
   return K_SetPage(address, (page & (K_PAGE_ADDRESS_MASK | K_PAGE_VALID)) | flags);

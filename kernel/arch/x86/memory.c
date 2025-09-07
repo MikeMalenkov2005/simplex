@@ -39,15 +39,61 @@ K_BOOL MMU_Init()
 
 K_HANDLE K_CreatePageMap()
 {
-  if (K_FreePageCount < 2) return NULL;
-  return NULL; /* TODO: IMPLEMENT */
+  K_HANDLE result;
+  K_USIZE *dir = K_FindLastFreeAddress(K_PAGE_SIZE << 1);
+  K_USIZE *table = dir + MMU_INDEX_MASK + 1;
+  K_USIZE pdi, pti, pde, pte;
+  if (!dir || !K_AllocatePage(dir, K_PAGE_WRITABLE | K_PAGE_READABLE)) return NULL;
+  result = (K_HANDLE)(K_GetPage(K_ZeroMemory(dir, K_PAGE_SIZE)) & K_PAGE_ADDRESS_MASK);
+  for (pdi = 0; pdi < MMU_INDEX_MASK; ++pdi)
+  {
+    pde = ((volatile K_USIZE*)MMU_PAGE_DIR)[pdi];
+    if (!(pde & MMU_PAGE_GLOBAL))
+    {
+      pte = ((volatile K_USIZE*)MMU_PAGE_TABLE)[pdi << MMU_INDEX_BITS];
+      if (pte & MMU_PAGE_GLOBAL)
+      {
+        if (!K_AllocatePage(table, K_PAGE_READABLE | K_PAGE_WRITABLE | K_PAGE_USER_MODE))
+        {
+          (void)K_DeletePageMap(result);
+          return NULL;
+        }
+        for (pti = 0; pti <= MMU_INDEX_MASK; ++pti)
+        {
+          pte = ((volatile K_USIZE*)MMU_PAGE_TABLE)[(pdi << MMU_INDEX_BITS) | pti];
+          table[pti] = (pte & MMU_PAGE_GLOBAL) ? pte : 0;
+        }
+        (void)K_SetPage(table, 0);
+      }
+    }
+    else dir[pdi] = pde;
+  }
+  dir[pdi] = (K_USIZE)result | MMU_PAGE_PRESENT | MMU_PAGE_READABLE | MMU_PAGE_WRITABLE;
+  (void)K_SetPage(dir, 0);
+  return result;
 }
 
 K_BOOL K_DeletePageMap(K_HANDLE map)
 {
-  if (K_GetPageMap() == map) return FALSE;
-  (void)map;
-  return FALSE; /* TODO: IMPLEMENT */
+  K_USIZE *dir = K_FindLastFreeAddress(K_PAGE_SIZE << 1);
+  K_USIZE *table = dir + MMU_INDEX_MASK + 1;
+  K_USIZE pdi, pti, page;
+  if (!dir || K_GetPageMap() == map) return FALSE;
+  (void)K_SetPage(dir, (K_USIZE)map | K_PAGE_VALID | K_PAGE_READABLE | K_PAGE_WRITABLE);
+  for (pdi = 0; pdi <= MMU_INDEX_MASK; ++pdi) if (dir[pdi] && !(dir[pdi] & MMU_PAGE_GLOBAL))
+  {
+    page = (dir[pdi] & K_PAGE_ADDRESS_MASK) | K_PAGE_VALID | K_PAGE_READABLE | K_PAGE_WRITABLE;
+    (void)K_SetPage(table, page);
+    for (pti = 0; pti <= MMU_INDEX_MASK; ++pti) if ((table[pti] & MMU_PAGE_PRESENT) && !(table[pti] & (MMU_PAGE_GLOBAL | MMU_PAGE_EXTERNAL)))
+    {
+      (void)K_SetPage(table, (table[pti] & K_PAGE_ADDRESS_MASK) | K_PAGE_VALID | K_PAGE_READABLE | K_PAGE_WRITABLE);
+      (void)K_FreePage(table);
+      (void)K_SetPage(table, page);
+    }
+    (void)K_FreePage(table);
+  }
+  (void)K_FreePage(dir);
+  return TRUE;
 }
 
 K_USIZE K_GetPage(K_HANDLE address)

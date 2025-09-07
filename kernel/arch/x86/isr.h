@@ -24,5 +24,7 @@ typedef struct ISR_Frame ISR_Frame;
 
 typedef void (*ISR_Handler)(ISR_Frame*);
 
+void ISR_Init();
+
 #endif
 

@@ -1,7 +1,10 @@
 #include "idt.h"
 
 #include "isr.h"
+#include "task.h"
 #include "utils.h"
+
+#include "../../timer.h"
 
 #define X_FOR_ISR \
   X(0 , 8, 0x8E)  \
@@ -64,8 +67,17 @@ K_U16 (*IDT)[4];
 
 void IDT_Dispatch(ISR_Frame *frame)
 {
-  if (frame->Index >= 32 && frame->Index < 48)
+  K_U32 index = frame->Index;
+  TASK_SetFrame(frame);
+  if (!index) K_TickCallback();
+  else if (!K_BeginTaskIRQ(index))
   {
+    /* TODO: Handle in kernel! */
+  }
+  if (index >= 32 && index < 48)
+  {
+    if (index >= 40) K_WritePort8(0xA0, 0x20);
+    K_WritePort8(0x20, 0x20);
   }
 }
 
@@ -80,6 +92,7 @@ void IDT_SetEntry(K_U8 index, K_USIZE address, K_U16 selector, K_U8 access)
 void IDT_Init()
 {
   IDT = K_ZeroMemory(NULL, 1024);
+  ISR_Init();
 #define X(i, s, a) IDT_SetEntry(i, (K_USIZE)ISR_Name(i), s, a);
   X_FOR_ISR
 #undef X

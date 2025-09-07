@@ -2,11 +2,10 @@
 #define _K_MEMORY_H
 
 #include <types.h>
+#include <sys/limits.h>
 
-#define K_PAGE_SHIFT        12
-#define K_PAGE_SIZE         ((K_USIZE)1 << K_PAGE_SHIFT)
 #define K_PAGE_FLAGS_MASK   (K_PAGE_SIZE - 1)
-#define K_PAGE_ADDRESS_MASK (~K_PAGE_FLAGS_MASK)
+#define K_PAGE_ADDRESS_MASK (~(K_USIZE)K_PAGE_FLAGS_MASK)
 
 #define K_PageDown(p) ((K_USIZE)(p) & K_PAGE_ADDRESS_MASK)
 #define K_PageUp(p)   K_PageDown((K_USIZE)(p) + K_PAGE_FLAGS_MASK)

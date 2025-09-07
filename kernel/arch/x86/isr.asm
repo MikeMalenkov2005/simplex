@@ -53,11 +53,44 @@ global ISR_47
 global ISR_128
 
 global IDT_Load
+global ISR_Init
 
 section .text
 
 IDT_Load:
   lidt [IDTR]
+  ret
+
+ISR_Init:
+  xor eax, eax
+  mov edx, eax
+  mov dl, 0x20
+  mov al, 0x11
+  out dx, al
+  mov dl, 0xA0
+  out dx, al
+  mov dl, 0x21
+  mov al, 0x20
+  out dx, al
+  mov dl, 0xA1
+  mov al, 0x28
+  out dx, al
+  mov dl, 0x21
+  mov al, 0x04
+  out dx, al
+  mov dl, 0xA1
+  mov al, 0x02
+  out dx, al
+  mov dl, 0x21
+  mov al, 0x01
+  out dx, al
+  mov dl, 0xA1
+  out dx, al
+  mov dl, 0x21
+  mov al, 0x00
+  out dx, al
+  mov dl, 0xA1
+  out dx, al
   ret
 
 ISR_Common:
