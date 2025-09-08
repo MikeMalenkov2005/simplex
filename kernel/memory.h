@@ -49,7 +49,7 @@ K_BOOL K_AllocatePages(K_HANDLE address, K_USIZE size, K_U16 flags);
 K_BOOL K_FreePages(K_HANDLE address, K_USIZE size);
 K_BOOL K_ChangePages(K_HANDLE address, K_USIZE size, K_U16 flags);
 
-K_BOOL K_IsUserRange(K_HANDLE address, K_USIZE size);
+K_BOOL K_IsUserRange(K_HANDLE address, K_USIZE size, K_U16 filter);
 
 #endif
 

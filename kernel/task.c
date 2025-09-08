@@ -204,21 +204,21 @@ K_BOOL K_WaitMessage(K_MessagePayload *buffer)
   return TRUE;
 }
 
-K_BOOL K_WaitTaskIRQ(K_U32 irq)
+K_BOOL K_WaitTaskIRQ(K_USIZE irq)
 {
   K_Task *task = K_GetCurrentTask();
   if (!task || !(task->Flags & K_TASK_MODULE)) return FALSE;
   K_EndTaskIRQ();
   if (task == K_TaskSlots + K_CurrentSlot && !K_SwitchTask()) return FALSE;
-  task->WaitInfo = (K_HANDLE)(K_USIZE)irq;
+  task->WaitInfo = (K_HANDLE)irq;
   task->Mode = K_TASK_MODE_WAIT_IRQ;
   return TRUE;
 }
 
-K_BOOL K_BeginTaskIRQ(K_U32 irq)
+K_BOOL K_BeginTaskIRQ(K_USIZE irq)
 {
-  K_U32 i = K_TASK_LIMIT;
-  while (i--) if ((K_U32)(K_USIZE)K_TaskSlots[i].WaitInfo == irq)
+  K_USIZE i = K_TASK_LIMIT;
+  while (i--) if ((K_USIZE)K_TaskSlots[i].WaitInfo == irq)
   {
     if (K_TaskSlots[i].Mode == K_TASK_MODE_WAIT_IRQ)
     {
@@ -240,7 +240,7 @@ K_BOOL K_BeginTaskIRQ(K_U32 irq)
 void K_EndTaskIRQ()
 {
   K_Task *task;
-  K_U32 i = K_TASK_LIMIT;
+  K_USIZE i = K_TASK_LIMIT;
   if (K_CurrentTaskIRQ)
   {
     K_CurrentTaskIRQ->WaitInfo = 0;

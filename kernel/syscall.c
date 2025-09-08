@@ -1,6 +1,8 @@
 #include "syscall.h"
 
 #include <sys/syscall.h>
+#include <sys/memory.h>
+#include "memory.h"
 #include "task.h"
 
 K_BOOL K_CallSendMessage(K_MessagePayload *payload, K_Task *target)
@@ -35,10 +37,73 @@ K_SSIZE K_CallCreateThread(K_HANDLE entry, K_USIZE stack)
   return task->TaskID;
 }
 
+K_HANDLE K_CallMapMemory(K_USIZE size, K_USIZE mode)
+{
+  K_HANDLE result = K_FindFirstFreeAddress(size);
+  K_U16 flags = K_PAGE_USER_MODE;
+  if (mode & MAP_READ) flags |= K_PAGE_READABLE;
+  if (mode & MAP_WRITE) flags |= K_PAGE_WRITABLE;
+  if (mode & MAP_EXECUTE) flags |= K_PAGE_EXECUTABLE;
+  if (result && !K_AllocatePages(result, size, flags)) result = NULL;
+  return result;
+}
+
+K_HANDLE K_CallMapDevice(K_USIZE start, K_USIZE size, K_USIZE mode)
+{
+  K_USIZE offset;
+  K_HANDLE result = K_FindFirstFreeAddress(size);
+  K_U16 flags = K_PAGE_USER_MODE | K_PAGE_EXTERNAL | K_PAGE_CACHE_DISABLE | K_PAGE_VALID;
+
+  if (mode & MAP_READ) flags |= K_PAGE_READABLE;
+  if (mode & MAP_WRITE) flags |= K_PAGE_WRITABLE;
+  if (mode & MAP_EXECUTE) flags |= K_PAGE_EXECUTABLE;
+  
+  size = K_PageUp(size);
+  if (result) for (offset = 0; offset < size; offset += K_PAGE_SIZE)
+  {
+    if (!K_SetPage(result + offset, (start + offset) | flags))
+    {
+      size = offset;
+      for (offset = 0; offset < size; offset += K_PAGE_SIZE)
+      {
+        (void)K_SetPage(result + offset, 0);
+      }
+      result = NULL;
+    }
+  }
+  return result;
+}
+
+K_BOOL K_CallFreeMapping(K_HANDLE address, K_USIZE size)
+{
+  K_USIZE offset;
+  K_U16 flags = K_GetRangeFlags(address, size);
+  if (((K_USIZE)address & K_PAGE_FLAGS_MASK) || !size || !(flags & K_PAGE_USER_MODE)) return FALSE;
+  if (flags & K_PAGE_EXTERNAL)
+  {
+    size = K_PageUp(size);
+    for (offset = 0; offset < size; ++offset)
+    {
+      (void)K_SetPage(address + offset, 0);
+    }
+    return TRUE;
+  }
+  return K_FreePages(address, size);
+}
+
+K_BOOL K_CallChangeMapping(K_HANDLE address, K_USIZE size, K_USIZE mode)
+{
+  K_U16 flags = K_GetRangeFlags(address, size);
+  if (((K_USIZE)address & K_PAGE_FLAGS_MASK) || !size || !(flags & K_PAGE_USER_MODE)) return FALSE;
+  flags = (mode & MAP_READ) ? (flags | K_PAGE_READABLE) : (flags & ~K_PAGE_READABLE);
+  flags = (mode & MAP_WRITE) ? (flags | K_PAGE_WRITABLE) : (flags & ~K_PAGE_WRITABLE);
+  flags = (mode & MAP_EXECUTE) ? (flags | K_PAGE_EXECUTABLE) : (flags & ~K_PAGE_EXECUTABLE);
+  return K_ChangePages(address, size, flags);
+}
+
 void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg3)
 {
   K_Task *task = K_GetCurrentTask();
-  (void)arg3;
   K_SetTaskR0(task, -1);
   switch (index)
   {
@@ -46,16 +111,28 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     (void)K_DeleteTask(task);
     break;
   case SYS_SEND:
-    if (K_CallSendMessage((void*)arg1, K_GetTask((K_U32)arg2))) K_SetTaskR0(task, 0);
+    if (K_IsUserRange((K_HANDLE)arg1, K_MESSAGE_SIZE, K_PAGE_READABLE))
+    {
+      if (K_CallSendMessage((void*)arg1, K_GetTask((K_U32)arg2))) K_SetTaskR0(task, 0);
+    }
     break;
   case SYS_POLL:
-    K_SetTaskR0(task, K_CallPollMessage((void*)arg1));
+    if (K_IsUserRange((K_HANDLE)arg1, K_MESSAGE_SIZE, K_PAGE_WRITABLE))
+    {
+      K_SetTaskR0(task, K_CallPollMessage((void*)arg1));
+    }
     break;
   case SYS_WAIT:
-    (void)K_WaitMessage((void*)arg1);
+    if (K_IsUserRange((K_HANDLE)arg1, K_MESSAGE_SIZE, K_PAGE_WRITABLE))
+    {
+      (void)K_WaitMessage((void*)arg1);
+    }
     break;
   case SYS_PEEK:
-    K_SetTaskR0(task, K_CallPeekMessage((void*)arg1));
+    if (K_IsUserRange((K_HANDLE)arg1, K_MESSAGE_SIZE, K_PAGE_WRITABLE))
+    {
+      K_SetTaskR0(task, K_CallPeekMessage((void*)arg1));
+    }
     break;
   case SYS_GET_TASK_ID:
     K_SetTaskR0(task, (K_SSIZE)task->TaskID);
@@ -71,6 +148,34 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     break;
   case SYS_CREATE_THREAD:
     K_SetTaskR0(task, K_CallCreateThread((K_HANDLE)arg1, arg2));
+    break;
+  case SYS_MAP:
+    if (!arg1)
+    {
+      K_SetTaskR0(task, (K_SSIZE)(K_USIZE)K_CallMapMemory(arg2, arg3));
+    }
+    else if (!(arg1 & K_PAGE_FLAGS_MASK) && (task->Flags & K_TASK_MODULE))
+    {
+  K_SetTaskR0(task, (K_SSIZE)(K_USIZE)K_CallMapDevice(arg1, arg2, arg3));
+    }
+    else K_SetTaskR0(task, 0);
+    break;
+  case SYS_FREE:
+    if (K_CallFreeMapping((K_HANDLE)arg1, arg2)) K_SetTaskR0(task, 0);
+    break;
+  case SYS_REMAP:
+    if (K_CallChangeMapping((K_HANDLE)arg1, arg2, arg3)) K_SetTaskR0(task, 0);
+    break;
+  case SYS_SHARE:
+    /* TODO: Implement memory sharing (probobly for modules only) */
+    break;
+  case SYS_IRQ_WAIT:
+    K_SetTaskR0(task, 0);
+    if (!K_WaitTaskIRQ(arg1)) K_SetTaskR0(task, -1);
+    break;
+  case SYS_IRQ_EXIT:
+    K_SetTaskR0(task, 0);
+    K_EndTaskIRQ();
     break;
   }
 }

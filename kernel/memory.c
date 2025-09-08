@@ -160,14 +160,16 @@ K_BOOL K_ChangePages(K_HANDLE address, K_USIZE size, K_U16 flags)
   return TRUE;
 }
 
-K_BOOL K_IsUserRange(K_HANDLE address, K_USIZE size)
+K_BOOL K_IsUserRange(K_HANDLE address, K_USIZE size, K_U16 filter)
 {
   K_USIZE offset;
   K_BOOL result = TRUE;
+  K_U16 flags;
   if (!(size = K_PageUp(size))) result = FALSE;
   for (offset = 0; result && offset < size; offset += K_PAGE_SIZE)
   {
-    result = !!(K_GetPage(address + offset) & K_PAGE_USER_MODE);
+    flags = K_GetPage(address + offset);
+    result = (flags & K_PAGE_USER_MODE) && (flags & filter) == filter;
   }
   return result;
 }
