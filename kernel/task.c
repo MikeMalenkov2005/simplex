@@ -73,6 +73,7 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
     {
       task->PageMap = K_GetPageMap();
       flags &= ~K_TASK_THREAD;
+      K_CurrentSlot = i;
     }
 
     map = K_GetPageMap();
