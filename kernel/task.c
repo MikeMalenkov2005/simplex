@@ -54,11 +54,11 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
 {
   K_HANDLE map;
   K_Task *task = NULL;
-  K_U32 slot = K_TASK_LIMIT;
+  K_U32 i = K_TASK_LIMIT;
   if (K_CurrentTaskIRQ || K_NextTaskID == K_TASK_INVALID_ID) return NULL;
-  while (slot--) if (!K_TaskSlots[slot].Mode)
+  while (i--) if (!K_TaskSlots[i].Mode)
   {
-    task = K_TaskSlots + slot;
+    task = K_TaskSlots + i;
     break;
   }
   if (task)
@@ -68,13 +68,13 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
       if (flags & K_TASK_THREAD) task->PageMap = K_TaskSlots[K_CurrentSlot].PageMap;
       else if (!(task->PageMap = K_CreatePageMap())) return NULL;
       task->ParentID = K_TaskSlots[K_CurrentSlot].TaskID;
-      K_SaveContext(K_TaskSlots[K_CurrentSlot].Context);
     }
     else
     {
       task->PageMap = K_GetPageMap();
       flags &= ~K_TASK_THREAD;
     }
+
     map = K_GetPageMap();
     if (map != task->PageMap) K_SetPageMap(task->PageMap);
     if (!(task->pMessageQueue = K_CreateMessageQueue()) || !(task->Context = K_CreateContext(stack, flags))) 
@@ -83,13 +83,12 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
       K_DeleteTask(task);
       return NULL;
     }
+    if (map != task->PageMap) K_SetPageMap(map);
 
     task->GroupID = (flags & K_TASK_THREAD) ? K_TaskSlots[K_CurrentSlot].GroupID : K_NextGroupID++;
     task->TaskID = K_NextTaskID++;
     task->Flags = flags;
     task->Mode = K_TASK_MODE_RUNNING;
-    K_CurrentSlot = slot;
-    K_LoadContext(task->Context);
   }
   return task;
 }
@@ -120,6 +119,32 @@ K_BOOL K_DeleteTask(K_Task *task)
   return TRUE;
 }
 
+K_BOOL K_SwitchTask()
+{
+  K_U32 limit = K_TASK_LIMIT;
+  K_BOOL switched = FALSE;
+  if (!K_CurrentTaskIRQ)
+  {
+    K_SaveContext(K_TaskSlots[K_CurrentSlot].Context);
+    while (!switched && limit--)
+    {
+      K_CurrentSlot = (K_CurrentSlot + 1) % K_TASK_LIMIT;
+      K_SetPageMap(K_TaskSlots[K_CurrentSlot].PageMap);
+      switch (K_TaskSlots[K_CurrentSlot].Mode)
+      {
+      case K_TASK_MODE_WAIT_MESSAGE:
+        break;
+      case K_TASK_MODE_WAIT_TIME:
+        break;
+      }
+      switched = K_TaskSlots[K_CurrentSlot].Mode == K_TASK_MODE_RUNNING;
+    }
+    if (limit >= K_TASK_LIMIT) switched = FALSE;
+    else K_LoadContext(K_TaskSlots[K_CurrentSlot].Context);
+  }
+  return switched;
+}
+
 K_BOOL K_SendMessage(K_Task *target, K_Message *message)
 {
   K_HANDLE map;
@@ -148,32 +173,6 @@ K_BOOL K_WaitMessage(K_U8 (*buffer)[K_MESSAGE_SIZE])
   return TRUE;
 }
 
-K_BOOL K_SwitchTask()
-{
-  K_U32 limit = K_TASK_LIMIT;
-  K_BOOL switched = FALSE;
-  if (!K_CurrentTaskIRQ)
-  {
-    K_SaveContext(K_TaskSlots[K_CurrentSlot].Context);
-    while (!switched && limit--)
-    {
-      K_CurrentSlot = (K_CurrentSlot + 1) % K_TASK_LIMIT;
-      K_SetPageMap(K_TaskSlots[K_CurrentSlot].PageMap);
-      switch (K_TaskSlots[K_CurrentSlot].Mode)
-      {
-      case K_TASK_MODE_WAIT_MESSAGE:
-        break;
-      case K_TASK_MODE_WAIT_TIME:
-        break;
-      }
-      switched = K_TaskSlots[K_CurrentSlot].Mode == K_TASK_MODE_RUNNING;
-    }
-    if (limit >= K_TASK_LIMIT) switched = FALSE;
-    else K_LoadContext(K_TaskSlots[K_CurrentSlot].Context);
-  }
-  return switched;
-}
-
 K_BOOL K_WaitTaskIRQ(K_U32 irq)
 {
   K_Task *task = K_GetCurrentTask();
@@ -187,22 +186,22 @@ K_BOOL K_WaitTaskIRQ(K_U32 irq)
 
 K_BOOL K_BeginTaskIRQ(K_U32 irq)
 {
-  K_U32 slot = K_TASK_LIMIT;
-  while (slot--) if ((K_U32)(K_USIZE)K_TaskSlots[slot].WaitInfo == irq)
+  K_U32 i = K_TASK_LIMIT;
+  while (i--) if ((K_U32)(K_USIZE)K_TaskSlots[i].WaitInfo == irq)
   {
-    if (K_TaskSlots[slot].Mode == K_TASK_MODE_WAIT_IRQ)
+    if (K_TaskSlots[i].Mode == K_TASK_MODE_WAIT_IRQ)
     {
       if (!K_CurrentTaskIRQ)
       {
-        K_CurrentTaskIRQ = K_TaskSlots + slot;
+        K_CurrentTaskIRQ = K_TaskSlots + i;
         K_SaveContext(K_TaskSlots[K_CurrentSlot].Context);
         K_SetPageMap(K_CurrentTaskIRQ->PageMap);
         K_LoadContext(K_CurrentTaskIRQ->Context);
       }
-      K_TaskSlots[slot].Mode = K_TASK_MODE_PROCESS_IRQ;
+      K_TaskSlots[i].Mode = K_TASK_MODE_PROCESS_IRQ;
       return TRUE;
     }
-    if (K_TaskSlots[slot].Mode == K_TASK_MODE_PROCESS_IRQ) return TRUE;
+    if (K_TaskSlots[i].Mode == K_TASK_MODE_PROCESS_IRQ) return TRUE;
   }
   return FALSE;
 }
@@ -210,16 +209,16 @@ K_BOOL K_BeginTaskIRQ(K_U32 irq)
 void K_EndTaskIRQ()
 {
   K_Task *task;
-  K_U32 slot = K_TASK_LIMIT;
+  K_U32 i = K_TASK_LIMIT;
   if (K_CurrentTaskIRQ)
   {
     K_CurrentTaskIRQ->WaitInfo = 0;
     K_CurrentTaskIRQ->Mode = K_TASK_MODE_RUNNING;
     K_SaveContext(K_CurrentTaskIRQ->Context);
     K_CurrentTaskIRQ = NULL;
-    while (!K_CurrentTaskIRQ && slot--) if (K_TaskSlots[slot].Mode == K_TASK_MODE_PROCESS_IRQ)
+    while (!K_CurrentTaskIRQ && i--) if (K_TaskSlots[i].Mode == K_TASK_MODE_PROCESS_IRQ)
     {
-      K_CurrentTaskIRQ = K_TaskSlots + slot;
+      K_CurrentTaskIRQ = K_TaskSlots + i;
     }
     task = K_GetCurrentTask();
     K_SetPageMap(task->PageMap);
