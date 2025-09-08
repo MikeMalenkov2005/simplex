@@ -10,24 +10,56 @@ void TASK_SetFrame(ISR_Frame *frame)
   TASK_Frame = frame;
 }
 
-K_HANDLE K_GetTaskIP()
+K_HANDLE K_GetTaskIP(K_Task *task)
 {
-  return (K_HANDLE)(K_USIZE)TASK_Frame->Eip;
+  K_HANDLE result;
+  K_Task *current = K_GetCurrentTask();
+  if (current != task)
+  {
+    if (current->PageMap != task->PageMap) K_SetPageMap(task->PageMap);
+    result = (K_HANDLE)(K_USIZE)((TASK_Context*)(task->Context + FPU_Size))->Frame.Eip;
+    if (current->PageMap != task->PageMap) K_SetPageMap(current->PageMap);
+  }
+  else result = (K_HANDLE)(K_USIZE)TASK_Frame->Eip;
+  return result;
 }
 
-void K_SetTaskIP(K_HANDLE ip)
+void K_SetTaskIP(K_Task *task, K_HANDLE ip)
 {
-  TASK_Frame->Eip = (K_U32)(K_USIZE)ip;
+  K_Task *current = K_GetCurrentTask();
+  if (current != task)
+  {
+    if (current->PageMap != task->PageMap) K_SetPageMap(task->PageMap);
+    ((TASK_Context*)(task->Context + FPU_Size))->Frame.Eip = (K_U32)(K_USIZE)ip;
+    if (current->PageMap != task->PageMap) K_SetPageMap(current->PageMap);
+  }
+  else TASK_Frame->Eip = (K_U32)(K_USIZE)ip;
 }
 
-K_SSIZE K_GetTaskR0()
+K_SSIZE K_GetTaskR0(K_Task *task)
 {
-  return (K_SSIZE)TASK_Frame->Eax;
+  K_SSIZE result;
+  K_Task *current = K_GetCurrentTask();
+  if (current != task)
+  {
+    if (current->PageMap != task->PageMap) K_SetPageMap(task->PageMap);
+    result = (K_SSIZE)((TASK_Context*)(task->Context + FPU_Size))->Frame.Eax;
+    if (current->PageMap != task->PageMap) K_SetPageMap(current->PageMap);
+  }
+  else result = (K_SSIZE)TASK_Frame->Eax;
+  return result;
 }
 
-void K_SetTaskR0(K_SSIZE r0)
+void K_SetTaskR0(K_Task *task, K_SSIZE r0)
 {
-  TASK_Frame->Eax = (K_U32)r0;
+  K_Task *current = K_GetCurrentTask();
+  if (current != task)
+  {
+    if (current->PageMap != task->PageMap) K_SetPageMap(task->PageMap);
+    ((TASK_Context*)(task->Context + FPU_Size))->Frame.Eax = (K_U32)r0;
+    if (current->PageMap != task->PageMap) K_SetPageMap(current->PageMap);
+  }
+  else TASK_Frame->Eax = (K_U32)r0;
 }
 
 K_HANDLE K_CreateContext(K_USIZE stack, K_U16 flags)

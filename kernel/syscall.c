@@ -27,26 +27,50 @@ K_SSIZE K_CallPeekMessage(K_MessagePayload *buffer)
   return message.SenderID;
 }
 
+K_SSIZE K_CallCreateThread(K_HANDLE entry, K_USIZE stack)
+{
+  K_Task *task = K_CreateTask(stack, K_GetCurrentTask()->Flags | K_TASK_THREAD);
+  if (!task) return -1;
+  K_SetTaskIP(task, entry);
+  return task->TaskID;
+}
+
 void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg3)
 {
+  K_Task *task = K_GetCurrentTask();
   (void)arg3;
-  K_SetTaskR0(-1);
+  K_SetTaskR0(task, -1);
   switch (index)
   {
   case SYS_EXIT:
-    (void)K_DeleteTask(K_GetCurrentTask());
+    (void)K_DeleteTask(task);
     break;
   case SYS_SEND:
-    if (K_CallSendMessage((void*)arg1, K_GetTask((K_U32)arg2))) K_SetTaskR0(0);
+    if (K_CallSendMessage((void*)arg1, K_GetTask((K_U32)arg2))) K_SetTaskR0(task, 0);
     break;
   case SYS_POLL:
-    K_SetTaskR0(K_CallPollMessage((void*)arg1));
+    K_SetTaskR0(task, K_CallPollMessage((void*)arg1));
     break;
   case SYS_WAIT:
     (void)K_WaitMessage((void*)arg1);
     break;
   case SYS_PEEK:
-    K_SetTaskR0(K_CallPeekMessage((void*)arg1));
+    K_SetTaskR0(task, K_CallPeekMessage((void*)arg1));
+    break;
+  case SYS_GET_TASK_ID:
+    K_SetTaskR0(task, (K_SSIZE)task->TaskID);
+    break;
+  case SYS_GET_GROUP_ID:
+    K_SetTaskR0(task, (K_SSIZE)task->GroupID);
+    break;
+  case SYS_GET_PARENT_ID:
+    K_SetTaskR0(task, (K_SSIZE)task->ParentID);
+    break;
+  case SYS_GET_LEADER_ID:
+    K_SetTaskR0(task, (K_SSIZE)K_GetMainTask(task->GroupID));
+    break;
+  case SYS_CREATE_THREAD:
+    K_SetTaskR0(task, K_CallCreateThread((K_HANDLE)arg1, arg2));
     break;
   }
 }

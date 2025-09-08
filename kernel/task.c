@@ -157,8 +157,8 @@ K_BOOL K_SwitchTask()
     }
     if (limit >= K_TASK_LIMIT) switched = FALSE;
     else K_LoadContext(K_TaskSlots[K_CurrentSlot].Context);
+    if (message.SenderID != K_TASK_INVALID_ID) K_SetTaskR0(K_TaskSlots + K_CurrentSlot, (K_SSIZE)message.SenderID);
   }
-  if (message.SenderID != K_TASK_INVALID_ID) K_SetTaskR0((K_SSIZE)message.SenderID);
   return switched;
 }
 
@@ -198,7 +198,7 @@ K_BOOL K_WaitMessage(K_MessagePayload *buffer)
   }
   else
   {
-    K_SetTaskR0((K_SSIZE)message.SenderID);
+    K_SetTaskR0(task, (K_SSIZE)message.SenderID);
     *buffer = message.Payload;
   }
   return TRUE;

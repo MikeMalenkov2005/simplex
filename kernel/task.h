@@ -50,11 +50,11 @@ K_BOOL K_WaitTaskIRQ(K_U32 irq);
 K_BOOL K_BeginTaskIRQ(K_U32 irq);
 void K_EndTaskIRQ();
 
-K_HANDLE K_GetTaskIP();
-void K_SetTaskIP(K_HANDLE ip);
+K_HANDLE K_GetTaskIP(K_Task *task);
+void K_SetTaskIP(K_Task *task, K_HANDLE ip);
 
-K_SSIZE K_GetTaskR0();
-void K_SetTaskR0(K_SSIZE r0);
+K_SSIZE K_GetTaskR0(K_Task *task);
+void K_SetTaskR0(K_Task *task, K_SSIZE r0);
 
 #endif
 
