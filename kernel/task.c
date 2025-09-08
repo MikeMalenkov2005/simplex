@@ -1,4 +1,5 @@
 #include "task.h"
+#include "timer.h"
 #include "memory.h"
 
 static K_U32 K_NextTaskID = 0;
@@ -122,8 +123,11 @@ K_BOOL K_DeleteTask(K_Task *task)
 
 K_BOOL K_SwitchTask()
 {
+  K_Message message;
   K_U32 limit = K_TASK_LIMIT;
   K_BOOL switched = FALSE;
+  message.SenderID = K_TASK_INVALID_ID;
+
   if (!K_CurrentTaskIRQ)
   {
     K_SaveContext(K_TaskSlots[K_CurrentSlot].Context);
@@ -134,8 +138,19 @@ K_BOOL K_SwitchTask()
       switch (K_TaskSlots[K_CurrentSlot].Mode)
       {
       case K_TASK_MODE_WAIT_MESSAGE:
+        if (K_PollMessage(K_TaskSlots[K_CurrentSlot].pMessageQueue, &message))
+        {
+          *(K_MessagePayload*)K_TaskSlots[K_CurrentSlot].WaitInfo = message.Payload;
+          K_TaskSlots[K_CurrentSlot].Mode = K_TASK_MODE_RUNNING;
+          K_TaskSlots[K_CurrentSlot].WaitInfo = NULL;
+        }
         break;
       case K_TASK_MODE_WAIT_TIME:
+        if ((K_S32)(K_U32)((K_USIZE)K_TaskSlots[K_CurrentSlot].WaitInfo - K_Ticks) <= 0)
+        {
+          K_TaskSlots[K_CurrentSlot].Mode = K_TASK_MODE_RUNNING;
+          K_TaskSlots[K_CurrentSlot].WaitInfo = NULL;
+        }
         break;
       }
       switched = K_TaskSlots[K_CurrentSlot].Mode == K_TASK_MODE_RUNNING;
@@ -143,7 +158,17 @@ K_BOOL K_SwitchTask()
     if (limit >= K_TASK_LIMIT) switched = FALSE;
     else K_LoadContext(K_TaskSlots[K_CurrentSlot].Context);
   }
+  if (message.SenderID != K_TASK_INVALID_ID) K_SetTaskR0((K_SSIZE)message.SenderID);
   return switched;
+}
+
+K_BOOL K_WaitTicks(K_U32 duration)
+{
+  K_Task *task = K_GetCurrentTask();
+  if (!task || !K_SwitchTask()) return FALSE;
+  task->WaitInfo = (K_HANDLE)(K_USIZE)(K_U32)(K_Ticks + duration);
+  task->Mode = K_TASK_MODE_WAIT_TIME;
+  return TRUE;
 }
 
 K_BOOL K_SendMessage(K_Task *target, K_Message *message)
@@ -160,7 +185,7 @@ K_BOOL K_SendMessage(K_Task *target, K_Message *message)
   return result;
 }
 
-K_BOOL K_WaitMessage(K_U8 (*buffer)[K_MESSAGE_SIZE])
+K_BOOL K_WaitMessage(K_MessagePayload *buffer)
 {
   K_Task *task = K_GetCurrentTask();
   K_Message message;
@@ -170,6 +195,11 @@ K_BOOL K_WaitMessage(K_U8 (*buffer)[K_MESSAGE_SIZE])
     if (!K_SwitchTask()) return FALSE;
     task->WaitInfo = buffer;
     task->Mode = K_TASK_MODE_WAIT_MESSAGE;
+  }
+  else
+  {
+    K_SetTaskR0((K_SSIZE)message.SenderID);
+    *buffer = message.Payload;
   }
   return TRUE;
 }

@@ -41,8 +41,10 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags);
 K_BOOL K_DeleteTask(K_Task *task);
 K_BOOL K_SwitchTask();
 
-K_BOOL K_SendTaskMessage(K_Task *target, K_Message *message);
-K_BOOL K_WaitMessage(K_U8 (*buffer)[K_MESSAGE_SIZE]);
+K_BOOL K_WaitTicks(K_U32 duration);
+
+K_BOOL K_SendMessage(K_Task *target, K_Message *message);
+K_BOOL K_WaitMessage(K_MessagePayload *buffer);
 
 K_BOOL K_WaitTaskIRQ(K_U32 irq);
 K_BOOL K_BeginTaskIRQ(K_U32 irq);
@@ -50,6 +52,9 @@ void K_EndTaskIRQ();
 
 K_HANDLE K_GetTaskIP();
 void K_SetTaskIP(K_HANDLE ip);
+
+K_SSIZE K_GetTaskR0();
+void K_SetTaskR0(K_SSIZE r0);
 
 #endif
 

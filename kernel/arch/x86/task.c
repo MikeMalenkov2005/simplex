@@ -20,6 +20,16 @@ void K_SetTaskIP(K_HANDLE ip)
   TASK_Frame->Eip = (K_U32)(K_USIZE)ip;
 }
 
+K_SSIZE K_GetTaskR0()
+{
+  return (K_SSIZE)TASK_Frame->Eax;
+}
+
+void K_SetTaskR0(K_SSIZE r0)
+{
+  TASK_Frame->Eax = (K_U32)r0;
+}
+
 K_HANDLE K_CreateContext(K_USIZE stack, K_U16 flags)
 {
   TASK_Context *ctx;

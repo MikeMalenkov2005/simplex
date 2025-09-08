@@ -4,10 +4,17 @@
 #include <types.h>
 #include <sys/limits.h>
 
+struct K_MessagePayload
+{
+  K_U8 Data[K_MESSAGE_SIZE];
+};
+
+typedef struct K_MessagePayload K_MessagePayload;
+
 struct K_Message
 {
   K_U32 SenderID;
-  K_U8 Payload[K_MESSAGE_SIZE];
+  K_MessagePayload Payload;
 };
 
 typedef struct K_Message K_Message;

@@ -9,6 +9,8 @@ global K_ReadPort16
 global K_ReadPort32
 global K_GetCPUFlags
 
+global memcpy
+
 section .text
 
 K_ZeroMemory:
@@ -60,4 +62,15 @@ K_GetCPUFlags:
   pushfd
   pop eax
   ret
+
+memcpy:
+  push esi
+  push edi
+  mov edi, [esp + 12]
+  mov esi, [esp + 16]
+  mov ecx, [esp + 20]
+  rep movsb
+  mov eax, [esp + 12]
+  pop edi
+  pop esi
 

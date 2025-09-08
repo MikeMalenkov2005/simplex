@@ -5,6 +5,7 @@
 #include "utils.h"
 
 #include "../../timer.h"
+#include "../../syscall.h"
 
 #define X_FOR_ISR \
   X(0 , 8, 0x8E)  \
@@ -69,11 +70,13 @@ void IDT_Dispatch(ISR_Frame *frame)
 {
   K_U32 index = frame->Index;
   TASK_SetFrame(frame);
-  if (!index) K_TickCallback();
-  else if (!K_BeginTaskIRQ(index))
+  if (index < 32)
   {
-    /* TODO: Handle in kernel! */
+    /* TODO: Handle Exceptions */
   }
+  else if (index == 32) K_TickCallback();
+  else if (index < 48) (void)K_BeginTaskIRQ(index);
+  else if (index == 128) K_SystemCallDispatch(frame->Eax, frame->Ebx, frame->Ecx, frame->Eax);
   if (index >= 32 && index < 48)
   {
     if (index >= 40) K_WritePort8(0xA0, 0x20);
