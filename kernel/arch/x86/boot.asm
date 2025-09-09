@@ -1,10 +1,11 @@
 [bits 32]
 
 global K_Init
-global K_MainInit
 global K_Stack
 
-extern K_Main
+global K_Idle
+global K_IdleSize
+
 extern K_ArchInit
 extern __boot_start
 extern __bss_start
@@ -76,11 +77,16 @@ K_Init:
 .InvalidLoader:
   jmp $
 
-K_MainInit:
-  push eax
-  call K_Main
-  add esp, 4
-  jmp $
+K_Idle:
+  mov eax, 10
+  int 0x80
+  xor eax, eax
+  jz K_Idle
+.end:
+
+section .data
+
+K_IdleSize: dd K_Idle.end - K_Idle
 
 section .bss
 

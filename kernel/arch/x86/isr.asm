@@ -176,6 +176,6 @@ section .rodata
 
 align 16
 IDTR:
-  dw 1023
+  dw 2047
   dd 0
 

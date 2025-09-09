@@ -3,8 +3,6 @@
 
 #include <types.h>
 
-void K_MainInit();
-
 struct K_BootInfo
 {
   K_U32 Size;

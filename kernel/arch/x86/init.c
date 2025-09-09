@@ -6,27 +6,17 @@
 #include "isr.h"
 #include "mmu.h"
 #include "task.h"
+#include "utils.h"
+
+extern void K_Idle;
+extern K_USIZE K_IdleSize;
 
 extern void __end;
 extern void K_Stack;
 static TSS K_MainTSS;
 
-void K_Debug(K_U16 x, K_U16 y, K_U8 *string)
-{
-  K_U16 *screen = (K_HANDLE)0xB8000;
-  K_U16 index = x + y * 80;
-  while (*string) screen[index++] = 0x200 | *string++;
-}
-
-#define K_ToHex(c) (((c) & 15) < 10 ? ((c) & 15) + '0' : ((c) & 15) + 'A' - 10)
-
-void K_DebugHex(K_U16 x, K_U16 y, K_U32 value)
-{
-  K_U8 string[9] = { 0 };
-  K_U8 offset = sizeof string - 1;
-  do { string[--offset] = K_ToHex(value); value >>= 4; } while (offset);
-  K_Debug(x, y, string);
-}
+extern void K_Panic(const char *message);
+extern void K_DebugHex(K_U16 x, K_U16 y, K_U32 value);
 
 K_BOOL K_IsPageFree(K_USIZE page, K_BootInfo *info)
 {
@@ -42,6 +32,7 @@ K_BOOL K_IsPageFree(K_USIZE page, K_BootInfo *info)
 
 void K_ArchInit(K_BootInfo *info, ISR_Frame *frame)
 {
+  K_HANDLE idle;
   K_BootTag *tag;
   K_BootTagMemoryMapEntry *ent;
   K_Task *task;
@@ -83,7 +74,11 @@ void K_ArchInit(K_BootInfo *info, ISR_Frame *frame)
   
   TASK_SetFrame(frame);
   task = K_CreateTask(0, K_TASK_MODULE);
-  K_SetTaskIP(task, K_MainInit);
+  idle = K_FindFirstFreeAddress(K_IdleSize);
+  if (!idle || !K_AllocatePage(idle, K_PAGE_READABLE | K_PAGE_EXECUTABLE | K_PAGE_USER_MODE | K_PAGE_VALID)) K_Panic("no idle!");
+  K_DebugHex(0, 0, (K_USIZE)(idle));
+  K_DebugHex(10, 0, K_GetPage(idle));
+  K_SetTaskIP(task, memcpy(idle, &K_Idle, K_IdleSize));
   
   K_BootForEach(info, tag) if (tag->Type == K_BOOT_TAG_MODULE)
   {

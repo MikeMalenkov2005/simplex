@@ -143,7 +143,7 @@ K_BOOL K_SetPage(K_HANDLE address, K_USIZE page)
   if (page & K_PAGE_GLOBAL) pte |= MMU_PAGE_GLOBAL;
   if (page & K_PAGE_EXTERNAL) pte |= MMU_PAGE_EXTERNAL;
   if (page & K_PAGE_CACHE_DISABLE) pte |= MMU_PAGE_CACHE_DISABLE;
-  ((volatile K_USIZE*)MMU_PAGE_TABLE)[pti] = page;
+  ((volatile K_USIZE*)MMU_PAGE_TABLE)[pti] = pte;
   K_InvalidatePage(address);
   for (pti = 0; pti <= MMU_INDEX_MASK; ++pti)
   {

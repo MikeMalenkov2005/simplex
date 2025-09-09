@@ -8,6 +8,7 @@ global K_ReadPort8
 global K_ReadPort16
 global K_ReadPort32
 global K_GetCPUFlags
+global K_GetCR2
 
 global memcpy
 
@@ -62,5 +63,22 @@ K_ReadPort32:
 K_GetCPUFlags:
   pushfd
   pop eax
+  ret
+
+K_GetCR2:
+  mov eax, cr2
+  ret
+
+memcpy:
+  push esi
+  push edi
+  mov edi, [esp + 12]
+  mov esi, [esp + 16]
+  mov ecx, [esp + 20]
+  mov edx, edi
+  rep movsb
+  mov eax, edx
+  pop edi
+  pop esi
   ret
 

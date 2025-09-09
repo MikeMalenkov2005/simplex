@@ -72,7 +72,7 @@ K_HANDLE K_CreateContext(K_USIZE stack, K_U16 flags)
     ctx = K_ZeroMemory((context + FPU_Size), sizeof *ctx);
     ctx->StackSize = stack ? stack : K_STACK_SIZE;
     ctx->pStackTop = K_FindLastFreeAddress(ctx->StackSize);
-    ctx->Frame.Esp = (K_U32)(K_USIZE)(ctx->pStackTop + ctx->StackSize);
+    ctx->Frame.Ebp = ctx->Frame.Esp = (K_U32)(K_USIZE)(ctx->pStackTop + ctx->StackSize);
     ctx->Frame.Eflags = (K_GetCPUFlags() & ~(K_U32)0x3CD5) | ((flags & K_TASK_MODULE) ? 0x3200 : 0x200);
     ctx->Frame.Cs = 0x1B;
     ctx->Frame.Ss = 0x23;

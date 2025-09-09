@@ -17,5 +17,9 @@ void K_ReadPort32(K_U16 port);
 
 K_U32 K_GetCPUFlags();
 
+K_USIZE K_GetCR2();
+
+void *memcpy(void *dest, void *src, K_USIZE size);
+
 #endif
 

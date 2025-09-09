@@ -66,17 +66,22 @@ X_FOR_ISR
 
 K_U16 (*IDT)[4];
 
+extern void K_DebugHex(K_U16 x, K_U16 y, K_U32 value);
+
 void IDT_Dispatch(ISR_Frame *frame)
 {
   K_U32 index = frame->Index;
   TASK_SetFrame(frame);
   if (index < 32)
   {
+    K_DebugHex(0, 3, index);
+    K_DebugHex(10, 3, frame->Eip);
+    K_DebugHex(20, 3, frame->Error);
     /* TODO: Handle Exceptions */
   }
   else if (index == 32) K_TickCallback();
-  else if (index < 48) (void)K_BeginTaskIRQ(index);
-  else if (index == 128) K_SystemCallDispatch(frame->Eax, frame->Ebx, frame->Ecx, frame->Eax);
+  else if (index < 48) (void)K_BeginTaskIRQ(index - 32);
+  else if (index == 128) K_SystemCallDispatch(frame->Eax, frame->Ebx, frame->Ecx, frame->Edx);
   if (index >= 32 && index < 48)
   {
     if (index >= 40) K_WritePort8(0xA0, 0x20);
