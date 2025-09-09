@@ -1,6 +1,7 @@
 [bits 32]
 
 global K_Init
+global K_MainInit
 global K_Stack
 
 extern K_Main
@@ -56,15 +57,29 @@ BootEndTag:
 BootHeader.end:
 
 K_Init:
+  cli
   cmp eax, LOADER_MAGIC
   jne .InvalidLoader
   mov esp, K_Stack
   mov ebp, esp
+  sub esp, 60
+  push esp
   push ebx
   call K_ArchInit
-  mov [esp], eax
-  call K_Main
+  add esp, 8
+  mov eax, [esp+56]
+  mov ds, ax
+  mov es, ax
+  popa
+  add esp, 8
+  iret
 .InvalidLoader:
+  jmp $
+
+K_MainInit:
+  push eax
+  call K_Main
+  add esp, 4
   jmp $
 
 section .bss

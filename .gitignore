@@ -4,4 +4,5 @@ compile_flags.txt
 *.iso
 *.sys
 *.o
+*.a
 

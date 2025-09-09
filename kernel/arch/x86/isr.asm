@@ -99,12 +99,14 @@ ISR_Common:
   mov ds, ax
   mov es, ax
   push esp
+  cld
   call IDT_Dispatch
   pop esp
   mov eax, [esp+56]
   mov ds, ax
   mov es, ax
   popa
+  add esp, 8
   iret
 
 %macro ISR_WithError 1

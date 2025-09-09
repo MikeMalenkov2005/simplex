@@ -3,6 +3,8 @@
 
 #include <types.h>
 
+void K_MainInit();
+
 struct K_BootInfo
 {
   K_U32 Size;
@@ -20,9 +22,8 @@ struct K_BootTag
 typedef struct K_BootTag K_BootTag;
 
 #define K_BootFirstTag(inf)     ((K_BootTag*)((inf) + 1))
-#define K_BootNextTag(tag)      ((K_BootTag*)((K_U8*)(tag) + (tag)->Size))
-#define K_BootIsValid(inf, tag) ((K_USIZE)(tag) - (K_USIZE)(inf) < (inf)->Size)
-#define K_BootForEach(inf, tag) for ((tag) = K_BootFirstTag(inf); K_BootIsValid(inf, tag); (tag) = K_BootNextTag(tag))
+#define K_BootNextTag(tag)      ((K_BootTag*)(((K_USIZE)(tag) + (tag)->Size + 7) & (~(K_USIZE)0 << 3)))
+#define K_BootForEach(inf, tag) for ((tag) = K_BootFirstTag(inf); (tag)->Type; (tag) = K_BootNextTag(tag))
 
 #define K_BOOT_TAG_COMMAND_LINE 1
 #define K_BOOT_TAG_LOADER_NAME  2

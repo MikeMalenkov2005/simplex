@@ -17,10 +17,11 @@ K_ZeroMemory:
   push edi
   mov ecx, [esp + 12]
   mov edi, [esp + 8]
+  mov edx, edi
   xor eax, eax
   rep stosb
+  mov eax, edx
   pop edi
-  mov eax, [esp + 8]
   ret
 
 K_WritePort8:
@@ -62,15 +63,4 @@ K_GetCPUFlags:
   pushfd
   pop eax
   ret
-
-memcpy:
-  push esi
-  push edi
-  mov edi, [esp + 12]
-  mov esi, [esp + 16]
-  mov ecx, [esp + 20]
-  rep movsb
-  mov eax, [esp + 12]
-  pop edi
-  pop esi
 
