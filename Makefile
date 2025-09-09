@@ -6,7 +6,7 @@ include $(ROOTDIR)/config.mk
 boot: kernel modules
 	$(MAKE) -C boot/$(ARCH)
 
-kernel: lib
+kernel:
 	$(MAKE) -C kernel
 
 modules: lib

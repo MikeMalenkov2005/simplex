@@ -8,11 +8,13 @@
 #define SYS_WAIT  3 /* Wait Message (buffer[K_MESSAGE_SIZE]) -> tid   */
 #define SYS_PEEK  4 /* Peek Message (buffer[K_MESSAGE_SIZE]) -> tid   */
 
-#define SYS_GET_TASK_ID   5 /* Get Task ID                            */
-#define SYS_GET_GROUP_ID  6 /* Get Task Group ID                      */
-#define SYS_GET_PARENT_ID 7 /* Get Parent Task ID                     */
-#define SYS_GET_LEADER_ID 8 /* Get Leader Task ID                     */
-#define SYS_CREATE_THREAD 9 /* Create Thread Task (entry, stack size) */
+#define SYS_GET_TASK_ID   5   /* Get Task ID                            */
+#define SYS_GET_GROUP_ID  6   /* Get Task Group ID                      */
+#define SYS_GET_PARENT_ID 7   /* Get Parent Task ID                     */
+#define SYS_GET_LEADER_ID 8   /* Get Leader Task ID                     */
+#define SYS_CREATE_THREAD 9   /* Create Thread Task (entry, stack size) */
+#define SYS_SWITCH_TASK   10  /* Switch to the next queued Task         */
+#define SYS_SIGNAL_TASK   11  /* Interrupt a Task (tid, value)          */
 
 #define SYS_MAP   20 /* Map Memory/Device (Address(for device), Size, Flags)  */
 #define SYS_FREE  21 /* Free Memory/Device (VirtualAddress, Size)             */

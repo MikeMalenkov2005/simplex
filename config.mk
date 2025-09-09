@@ -23,7 +23,7 @@ CC = clang
 CFLAGS = -I$(ROOTDIR)/include -ffreestanding -fno-builtin -nostdlib -nostdinc -fno-stack-protector -Wall -Wextra -Werror -ansi -Os -c
 
 LD = ld.lld
-LDFLAGS = -s -L$(ROOTDIR) -l$(LIB_NAME)
+LDFLAGS = -s -L$(ROOTDIR)
 
 AR = ar
 ARFLAGS = rcs

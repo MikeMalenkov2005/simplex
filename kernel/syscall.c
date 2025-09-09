@@ -149,6 +149,10 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
   case SYS_CREATE_THREAD:
     K_SetTaskR0(task, K_CallCreateThread((K_HANDLE)arg1, arg2));
     break;
+  case SYS_SWITCH_TASK:
+    K_SetTaskR0(task, 0);
+    if (!K_SwitchTask()) K_SetTaskR0(task, -1);
+    break;
   case SYS_MAP:
     if (!arg1)
     {
