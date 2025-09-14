@@ -195,6 +195,7 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     if (K_TLSSetEntry(task->tls, arg1, arg2)) K_SetTaskR0(task, 0);
     break;
   case SYS_GROUP_EXIT:
+    (void)K_DeleteTask(K_GetMainTask(task->GroupID));
     break;
   case SYS_MAP:
     if (!arg1)
