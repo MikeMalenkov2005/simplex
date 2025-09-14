@@ -48,6 +48,11 @@ BootEntryTag:
   dd K_Init
 .end:
 
+BootAlignTag:
+  dw 6
+  dw 0
+  dd $ - BootAlignTag
+
 %endif
 
 BootEndTag:

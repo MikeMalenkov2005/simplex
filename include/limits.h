@@ -4,7 +4,6 @@
 #if defined(__x86_64__)
 #define _LONG_64BITS
 #elif defined(__arm__)
-#define _LONG_32BITS
 #define _CHAR_UNSIGNED
 #endif
 

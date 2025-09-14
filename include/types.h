@@ -15,6 +15,22 @@ typedef signed long   K_SSIZE;
 typedef void *K_HANDLE;
 typedef K_S32 K_BOOL;
 
+union K_U64S
+{
+  K_USIZE Value;
+  struct { K_U32 Low, High; }; /* TODO: Change for BigEndian! */
+};
+
+typedef union K_U64S K_U64S;
+
+union K_S64S
+{
+  K_SSIZE Value;
+  struct { K_U32 Low, High; }; /* TODO: Change for BigEndian! */
+};
+
+typedef union K_S64S K_S64S;
+
 #define TRUE  1
 #define FALSE 0
 

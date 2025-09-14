@@ -77,6 +77,8 @@ void IDT_Dispatch(ISR_Frame *frame)
     K_DebugHex(0, 3, index);
     K_DebugHex(10, 3, frame->Eip);
     K_DebugHex(20, 3, frame->Error);
+    K_DebugHex(30, 3, K_GetCR2());
+    for (;;);
     /* TODO: Handle Exceptions */
   }
   else if (index == 32) K_TickCallback();

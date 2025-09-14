@@ -48,7 +48,7 @@ K_HANDLE K_CreatePageMap()
   for (pdi = 0; pdi < MMU_INDEX_MASK; ++pdi)
   {
     pde = ((volatile K_USIZE*)MMU_PAGE_DIR)[pdi];
-    if (!(pde & MMU_PAGE_GLOBAL))
+    if (pde && !(pde & MMU_PAGE_GLOBAL))
     {
       pte = ((volatile K_USIZE*)MMU_PAGE_TABLE)[pdi << MMU_INDEX_BITS];
       if (pte & MMU_PAGE_GLOBAL)
@@ -58,6 +58,7 @@ K_HANDLE K_CreatePageMap()
           (void)K_DeletePageMap(result);
           return NULL;
         }
+        dir[pdi] = ((volatile K_USIZE*)MMU_PAGE_TABLE)[(K_USIZE)table >> K_PAGE_SHIFT];
         for (pti = 0; pti <= MMU_INDEX_MASK; ++pti)
         {
           pte = ((volatile K_USIZE*)MMU_PAGE_TABLE)[(pdi << MMU_INDEX_BITS) | pti];
@@ -68,7 +69,7 @@ K_HANDLE K_CreatePageMap()
     }
     else dir[pdi] = pde;
   }
-  dir[pdi] = (K_USIZE)result | MMU_PAGE_PRESENT | MMU_PAGE_READABLE | MMU_PAGE_WRITABLE;
+  dir[pdi] = (K_USIZE)result | MMU_PAGE_PRESENT | MMU_PAGE_WRITABLE;
   (void)K_SetPage(dir, 0);
   return result;
 }
@@ -80,7 +81,7 @@ K_BOOL K_DeletePageMap(K_HANDLE map)
   K_USIZE pdi, pti, page;
   if (!dir || K_GetPageMap() == map) return FALSE;
   (void)K_SetPage(dir, (K_USIZE)map | K_PAGE_VALID | K_PAGE_READABLE | K_PAGE_WRITABLE);
-  for (pdi = 0; pdi <= MMU_INDEX_MASK; ++pdi) if (dir[pdi] && !(dir[pdi] & MMU_PAGE_GLOBAL))
+  for (pdi = 0; pdi < MMU_INDEX_MASK; ++pdi) if (dir[pdi] && !(dir[pdi] & MMU_PAGE_GLOBAL))
   {
     page = (dir[pdi] & K_PAGE_ADDRESS_MASK) | K_PAGE_VALID | K_PAGE_READABLE | K_PAGE_WRITABLE;
     (void)K_SetPage(table, page);
