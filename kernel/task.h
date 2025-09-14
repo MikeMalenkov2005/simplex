@@ -22,6 +22,7 @@ struct K_Task
   K_HANDLE WaitInfo;
   K_HANDLE PageMap;
   K_HANDLE Context;
+  K_HANDLE Handler;
   K_U32 ParentID;
   K_U32 GroupID;
   K_U32 TaskID;
@@ -55,6 +56,9 @@ void K_SetTaskIP(K_Task *task, K_HANDLE ip);
 
 K_SSIZE K_GetTaskR0(K_Task *task);
 void K_SetTaskR0(K_Task *task, K_SSIZE r0);
+
+K_BOOL K_TaskPush(K_Task *task, K_USIZE value);
+K_BOOL K_TaskPop(K_Task *task, K_USIZE *value);
 
 #endif
 

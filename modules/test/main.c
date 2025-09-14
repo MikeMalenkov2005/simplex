@@ -1,4 +1,5 @@
-void Init()
+int main()
 {
+  for (;;);
 }
 

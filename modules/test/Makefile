@@ -3,7 +3,7 @@ include $(ROOTDIR)/config.mk
 
 MODULE_FILE = $(ROOTDIR)/test.sys
 
-LDFLAGS += -e Init
+LDFLAGS += -l$(LIB_NAME)
 
 .PHONY: clean
 

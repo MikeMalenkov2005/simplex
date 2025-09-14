@@ -37,6 +37,18 @@ K_SSIZE K_CallCreateThread(K_HANDLE entry, K_USIZE stack)
   return task->TaskID;
 }
 
+K_BOOL K_CallSignalTask(K_Task *task, K_USIZE value)
+{
+  if (!task || !task->Handler || !K_TaskPush(task, value)) return FALSE;
+  if (!K_TaskPush(task, (K_USIZE)K_GetTaskIP(task)))
+  {
+    (void)K_TaskPop(task, &value);
+    return FALSE;
+  }
+  K_SetTaskIP(task, task->Handler);
+  return TRUE;
+}
+
 K_HANDLE K_CallMapMemory(K_USIZE size, K_USIZE mode)
 {
   K_HANDLE result = K_FindFirstFreeAddress(size);
@@ -153,6 +165,25 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     K_SetTaskR0(task, 0);
     if (!K_SwitchTask()) K_SetTaskR0(task, -1);
     break;
+  case SYS_SIGNAL_TASK:
+    if (K_CallSignalTask(K_GetTask((K_U32)arg1), arg2)) K_SetTaskR0(task, 0);
+    break;
+  case SYS_SET_HANDLER:
+    K_SetTaskR0(task, (K_USIZE)task->Handler);
+    task->Handler = (K_HANDLE)arg1;
+    break;
+  case SYS_LOCK_ACQUIRE:
+    if (!(arg1 & 3) && K_IsUserRange((K_HANDLE)arg1, 4, K_PAGE_READABLE | K_PAGE_WRITABLE) && *(K_U32*)arg1 == K_TASK_INVALID_ID)
+    {
+      *(K_U32*)arg1 = task->TaskID;
+      K_SetTaskR0(task, 0);
+    }
+  case SYS_LOCK_RELEASE:
+    if (!(arg1 & 3) && K_IsUserRange((K_HANDLE)arg1, 4, K_PAGE_READABLE | K_PAGE_WRITABLE) && *(K_U32*)arg1 == task->TaskID)
+    {
+      *(K_U32*)arg1 = K_TASK_INVALID_ID;
+      K_SetTaskR0(task, 0);
+    }
   case SYS_MAP:
     if (!arg1)
     {
@@ -160,7 +191,7 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     }
     else if (!(arg1 & K_PAGE_FLAGS_MASK) && (task->Flags & K_TASK_MODULE))
     {
-  K_SetTaskR0(task, (K_SSIZE)(K_USIZE)K_CallMapDevice(arg1, arg2, arg3));
+      K_SetTaskR0(task, (K_SSIZE)(K_USIZE)K_CallMapDevice(arg1, arg2, arg3));
     }
     else K_SetTaskR0(task, 0);
     break;

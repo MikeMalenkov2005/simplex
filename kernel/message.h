@@ -1,5 +1,5 @@
-#ifndef _MESSAGE_H
-#define _MESSAGE_H
+#ifndef _K_MESSAGE_H
+#define _K_MESSAGE_H
 
 #include <types.h>
 #include <sys/limits.h>

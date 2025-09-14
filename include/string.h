@@ -1,11 +1,11 @@
 #ifndef _STRING_H
 #define _STRING_H
 
-#ifndef _SIZE_T
-#define _SIZE_T
-typedef unsigned long size_t;
-#endif
+#include <stddef.h>
 
+int memcmp(const void *lhs, const void *rhs, size_t count);
+void *memcpy(void *dest, const void *src, size_t count);
+void *memset(void *dest, int ch, size_t count);
 
 #endif
 

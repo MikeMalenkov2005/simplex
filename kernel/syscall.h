@@ -1,5 +1,5 @@
-#ifndef _SYSCALL_H
-#define _SYSCALL_H
+#ifndef _K_SYSCALL_H
+#define _K_SYSCALL_H
 
 #include <types.h>
 

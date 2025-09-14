@@ -62,6 +62,52 @@ void K_SetTaskR0(K_Task *task, K_SSIZE r0)
   else TASK_Frame->Eax = (K_U32)r0;
 }
 
+K_BOOL K_TaskPush(K_Task *task, K_USIZE value)
+{
+  K_USIZE *sp;
+  K_Task *current = K_GetCurrentTask();
+  volatile ISR_Frame *frame = TASK_Frame;
+  volatile TASK_Context *ctx = (task->Context + FPU_Size);
+  K_BOOL result = FALSE;
+
+  if (current->PageMap != task->PageMap) K_SetPageMap(task->PageMap);
+  if (current != task) frame = &ctx->Frame;
+
+  sp = (K_USIZE*)(K_USIZE)frame->Esp - 1;
+  if ((K_USIZE)ctx->pStackTop <= (K_USIZE)sp && (K_USIZE)ctx->pStackTop + ctx->StackSize > (K_USIZE)sp)
+  {
+    *sp = value;
+    frame->Esp = (K_USIZE)sp;
+    result = TRUE;
+  }
+
+  if (current->PageMap != task->PageMap) K_SetPageMap(current->PageMap);
+  return result;
+}
+
+K_BOOL K_TaskPop(K_Task *task, K_USIZE *value)
+{
+  K_USIZE *sp;
+  K_Task *current = K_GetCurrentTask();
+  volatile ISR_Frame *frame = TASK_Frame;
+  volatile TASK_Context *ctx = (task->Context + FPU_Size);
+  K_BOOL result = FALSE;
+
+  if (current->PageMap != task->PageMap) K_SetPageMap(task->PageMap);
+  if (current != task) frame = &ctx->Frame;
+
+  sp = (K_USIZE*)(K_USIZE)frame->Esp;
+  if ((K_USIZE)ctx->pStackTop <= (K_USIZE)sp && (K_USIZE)ctx->pStackTop + ctx->StackSize > (K_USIZE)sp)
+  {
+    *value = *sp++;
+    frame->Esp = (K_USIZE)sp;
+    result = TRUE;
+  }
+
+  if (current->PageMap != task->PageMap) K_SetPageMap(current->PageMap);
+  return result;
+}
+
 K_HANDLE K_CreateContext(K_USIZE stack, K_U16 flags)
 {
   TASK_Context *ctx;

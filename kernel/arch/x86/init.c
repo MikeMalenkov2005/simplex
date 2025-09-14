@@ -16,7 +16,6 @@ extern void K_Stack;
 static TSS K_MainTSS;
 
 extern void K_Panic(const char *message);
-extern void K_DebugHex(K_U16 x, K_U16 y, K_U32 value);
 
 K_BOOL K_IsPageFree(K_USIZE page, K_BootInfo *info)
 {
@@ -32,10 +31,10 @@ K_BOOL K_IsPageFree(K_USIZE page, K_BootInfo *info)
 
 void K_ArchInit(K_BootInfo *info, ISR_Frame *frame)
 {
-  K_HANDLE idle;
   K_BootTag *tag;
   K_BootTagMemoryMapEntry *ent;
-  K_Task *task;
+  K_Task *idle, module;
+  K_HANDLE address;
   K_USIZE page;
 
   IDT_Init();
@@ -73,22 +72,22 @@ void K_ArchInit(K_BootInfo *info, ISR_Frame *frame)
   K_InitTaskSlots();
   
   TASK_SetFrame(frame);
-  task = K_CreateTask(0, K_TASK_MODULE);
-  idle = K_FindFirstFreeAddress(K_IdleSize);
-  if (!idle || !K_AllocatePage(idle, K_PAGE_READABLE | K_PAGE_EXECUTABLE | K_PAGE_USER_MODE | K_PAGE_VALID)) K_Panic("no idle!");
-  K_DebugHex(0, 0, (K_USIZE)(idle));
-  K_DebugHex(10, 0, K_GetPage(idle));
-  K_SetTaskIP(task, memcpy(idle, &K_Idle, K_IdleSize));
+  idle = K_CreateTask(0, K_TASK_MODULE);
+  address = K_FindFirstFreeAddress(K_IdleSize);
+  if (!address || !K_AllocatePage(address, K_PAGE_READABLE | K_PAGE_EXECUTABLE | K_PAGE_USER_MODE)) K_Panic("no idle!");
+  K_SetTaskIP(idle, memcpy(address, &K_Idle, K_IdleSize));
   
+  (void)module;
   K_BootForEach(info, tag) if (tag->Type == K_BOOT_TAG_MODULE)
   {
     /* TODO: Load modules as tasks */
   }
 
+  K_SetPageMap(idle->PageMap);
+
   K_BootForEach(info, tag) if (tag->Type == K_BOOT_TAG_COMMAND_LINE)
   {
-    K_SetTaskR0(task, (K_SSIZE)(K_USIZE)((K_BootTagCommandLine*)tag)->String);
-    break;
+    /* TODO: Handle command line */
   }
 }
 

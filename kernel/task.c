@@ -19,6 +19,7 @@ void K_ClearTaskSlot(K_Task *task)
   task->WaitInfo = NULL;
   task->PageMap = NULL;
   task->Context = NULL;
+  task->Handler = NULL;
   task->ParentID = K_TASK_INVALID_ID;
   task->GroupID = K_TASK_INVALID_ID;
   task->TaskID = K_TASK_INVALID_ID;
@@ -78,7 +79,8 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
     }
 
     if (map != task->PageMap) K_SetPageMap(task->PageMap);
-    if (!(task->pMessageQueue = K_CreateMessageQueue()) || !(task->Context = K_CreateContext(stack, flags))) 
+    if (!(task->pMessageQueue = K_CreateMessageQueue()) ||
+        !(task->Context = K_CreateContext(stack, flags))) 
     {
       if (map != task->PageMap) K_SetPageMap(map);
       K_DeleteTask(task);
