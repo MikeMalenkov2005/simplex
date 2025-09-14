@@ -4,6 +4,7 @@
 #include <sys/memory.h>
 #include "memory.h"
 #include "task.h"
+#include "tls.h"
 
 K_BOOL K_CallSendMessage(K_MessagePayload *payload, K_Task *target)
 {
@@ -184,6 +185,17 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
       *(K_U32*)arg1 = K_TASK_INVALID_ID;
       K_SetTaskR0(task, 0);
     }
+  case SYS_TLS_NEW:
+    K_SetTaskR0(task, K_TLSNewEntry(task->tls));
+    break;
+  case SYS_TLS_GET:
+    K_SetTaskR0(task, K_TLSGetEntry(task->tls, arg1));
+    break;
+  case SYS_TLS_SET:
+    if (K_TLSSetEntry(task->tls, arg1, arg2)) K_SetTaskR0(task, 0);
+    break;
+  case SYS_GROUP_EXIT:
+    break;
   case SYS_MAP:
     if (!arg1)
     {

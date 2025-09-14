@@ -2,6 +2,7 @@
 #define _K_TASK_H
 
 #include "message.h"
+#include "tls.h"
 
 #define K_TASK_LIMIT  1024
 
@@ -18,6 +19,7 @@
 
 struct K_Task
 {
+  K_TLS *tls;
   K_MessageQueue *pMessageQueue;
   K_HANDLE WaitInfo;
   K_HANDLE PageMap;

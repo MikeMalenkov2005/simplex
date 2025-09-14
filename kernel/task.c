@@ -1,6 +1,7 @@
 #include "task.h"
 #include "timer.h"
 #include "memory.h"
+#include "tls.h"
 
 static K_U32 K_NextTaskID = 0;
 static K_U32 K_NextGroupID = 0;
@@ -15,6 +16,7 @@ extern void K_LoadContext(K_HANDLE context);
 
 void K_ClearTaskSlot(K_Task *task)
 {
+  task->tls = NULL;
   task->pMessageQueue = NULL;
   task->WaitInfo = NULL;
   task->PageMap = NULL;
@@ -79,7 +81,8 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
     }
 
     if (map != task->PageMap) K_SetPageMap(task->PageMap);
-    if (!(task->pMessageQueue = K_CreateMessageQueue()) ||
+    if (!(task->tls = K_CreateTLS((flags & K_TASK_THREAD) ? K_TaskSlots[K_CurrentSlot].tls : NULL)) ||
+        !(task->pMessageQueue = K_CreateMessageQueue()) ||
         !(task->Context = K_CreateContext(stack, flags))) 
     {
       if (map != task->PageMap) K_SetPageMap(map);
@@ -115,6 +118,7 @@ K_BOOL K_DeleteTask(K_Task *task)
   if (task->Flags & K_TASK_THREAD)
   {
     if (map != task->PageMap) K_SetPageMap(task->PageMap);
+    K_DeleteTLS(task->tls);
     K_DeleteMessageQueue(task->pMessageQueue);
     K_DeleteContext(task->Context);
     if (map != task->PageMap) K_SetPageMap(map);
