@@ -1,5 +1,7 @@
 #include "syscall.h"
 
+#define __CRT_MAP_FLAGS
+
 #include <sys/syscall.h>
 #include <sys/memory.h>
 #include "memory.h"
@@ -43,7 +45,7 @@ K_BOOL K_CallSignalTask(K_Task *task, K_USIZE value)
   if (!task || !task->Handler || !K_TaskPush(task, value)) return FALSE;
   if (!K_TaskPush(task, (K_USIZE)K_GetTaskIP(task)))
   {
-    (void)K_TaskPop(task, &value);
+(void)K_TaskPop(task, &value);
     return FALSE;
   }
   K_SetTaskIP(task, task->Handler);
@@ -52,11 +54,13 @@ K_BOOL K_CallSignalTask(K_Task *task, K_USIZE value)
 
 K_HANDLE K_CallMapMemory(K_USIZE size, K_USIZE mode)
 {
-  K_HANDLE result = K_FindFirstFreeAddress(size);
+  K_HANDLE result = (mode & MAP_UP)
+    ? K_FindFirstFreeAddress(size)
+    : K_FindLastFreeAddress(size);
   K_U16 flags = K_PAGE_USER_MODE;
-  if (mode & MAP_READ) flags |= K_PAGE_READABLE;
-  if (mode & MAP_WRITE) flags |= K_PAGE_WRITABLE;
-  if (mode & MAP_EXECUTE) flags |= K_PAGE_EXECUTABLE;
+  if (mode & MAP_RD) flags |= K_PAGE_READABLE;
+  if (mode & MAP_WR) flags |= K_PAGE_WRITABLE;
+  if (mode & MAP_EX) flags |= K_PAGE_EXECUTABLE;
   if (result && !K_AllocatePages(result, size, flags)) result = NULL;
   return result;
 }
@@ -67,9 +71,9 @@ K_HANDLE K_CallMapDevice(K_USIZE start, K_USIZE size, K_USIZE mode)
   K_HANDLE result = K_FindFirstFreeAddress(size);
   K_U16 flags = K_PAGE_USER_MODE | K_PAGE_EXTERNAL | K_PAGE_CACHE_DISABLE | K_PAGE_VALID;
 
-  if (mode & MAP_READ) flags |= K_PAGE_READABLE;
-  if (mode & MAP_WRITE) flags |= K_PAGE_WRITABLE;
-  if (mode & MAP_EXECUTE) flags |= K_PAGE_EXECUTABLE;
+  if (mode & MAP_RD) flags |= K_PAGE_READABLE;
+  if (mode & MAP_WR) flags |= K_PAGE_WRITABLE;
+  if (mode & MAP_EX) flags |= K_PAGE_EXECUTABLE;
   
   size = K_PageUp(size);
   if (result) for (offset = 0; offset < size; offset += K_PAGE_SIZE)
@@ -108,9 +112,9 @@ K_BOOL K_CallChangeMapping(K_HANDLE address, K_USIZE size, K_USIZE mode)
 {
   K_U16 flags = K_GetRangeFlags(address, size);
   if (((K_USIZE)address & K_PAGE_FLAGS_MASK) || !size || !(flags & K_PAGE_USER_MODE)) return FALSE;
-  flags = (mode & MAP_READ) ? (flags | K_PAGE_READABLE) : (flags & ~K_PAGE_READABLE);
-  flags = (mode & MAP_WRITE) ? (flags | K_PAGE_WRITABLE) : (flags & ~K_PAGE_WRITABLE);
-  flags = (mode & MAP_EXECUTE) ? (flags | K_PAGE_EXECUTABLE) : (flags & ~K_PAGE_EXECUTABLE);
+  flags = (mode & MAP_RD) ? (flags | K_PAGE_READABLE) : (flags & ~K_PAGE_READABLE);
+  flags = (mode & MAP_WR) ? (flags | K_PAGE_WRITABLE) : (flags & ~K_PAGE_WRITABLE);
+  flags = (mode & MAP_EX) ? (flags | K_PAGE_EXECUTABLE) : (flags & ~K_PAGE_EXECUTABLE);
   return K_ChangePages(address, size, flags);
 }
 
@@ -173,18 +177,6 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     K_SetTaskR0(task, (K_USIZE)task->Handler);
     task->Handler = (K_HANDLE)arg1;
     break;
-  case SYS_LOCK_ACQUIRE:
-    if (!(arg1 & 3) && K_IsUserRange((K_HANDLE)arg1, 4, K_PAGE_READABLE | K_PAGE_WRITABLE) && *(K_U32*)arg1 == K_TASK_INVALID_ID)
-    {
-      *(K_U32*)arg1 = task->TaskID;
-      K_SetTaskR0(task, 0);
-    }
-  case SYS_LOCK_RELEASE:
-    if (!(arg1 & 3) && K_IsUserRange((K_HANDLE)arg1, 4, K_PAGE_READABLE | K_PAGE_WRITABLE) && *(K_U32*)arg1 == task->TaskID)
-    {
-      *(K_U32*)arg1 = K_TASK_INVALID_ID;
-      K_SetTaskR0(task, 0);
-    }
   case SYS_TLS_NEW:
     K_SetTaskR0(task, K_TLSNewEntry(task->tls));
     break;

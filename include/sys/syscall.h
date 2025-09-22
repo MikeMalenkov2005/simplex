@@ -19,9 +19,6 @@
 #define SYS_SIGNAL_TASK   11  /* Interrupt a Task (tid, value to stack) */
 #define SYS_SET_HANDLER   12  /* Set a Signal Handler (func)            */
 
-#define SYS_LOCK_ACQUIRE  13  /* Try to acquire a Lock (tid ptr)        */
-#define SYS_LOCK_RELEASE  14  /* Try to release a Lock (tid ptr)        */
-
 #define SYS_TLS_NEW       15  /* Create a new TLS entry () -> slot      */
 #define SYS_TLS_GET       16  /* Get a TLS entry value (slot) -> value  */
 #define SYS_TLS_SET       17  /* Set a TLS entry value (slot, value)    */

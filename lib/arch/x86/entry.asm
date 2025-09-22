@@ -1,23 +1,20 @@
 [bits 32]
 
 global _start
+global __crt_signal_handler
 
+extern __crt_init
 extern main
-extern raise
+extern exit
 
-global __crt_heap_base
-global __crt_heap_size
+extern raise
 
 section .text
 
 _start:
-  mov eax, 12
-  lea ebx, [__crt_signal_handler]
-  int 0x80
+  call __crt_init
   call main
-  mov ebx, eax
-  xor eax, eax
-  int 0x80
+  call exit
 
 __crt_signal_handler:
   xchg eax, [esp + 4]
@@ -30,9 +27,4 @@ __crt_signal_handler:
   pop ecx ; restore volatile registers
   xchg eax, [esp + 4]
   ret 4 ; return and discard signal number
-
-section .data
-
-__crt_heap_base: dd 0
-__crt_heap_size: dd 0
 

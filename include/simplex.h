@@ -30,10 +30,7 @@ long __syscall(long number, long arg1, long arg2, long arg3);
 #define sys_switch() syscall(SYS_SWITCH_TASK)
 
 #define sys_signal(tid, sig) syscall(SYS_SIGNAL_TASK, tid, sig)
-#define sys_handler(handler) syscall(SYS_SET_HANDLER, (unsigned long)(handler))
-
-#define sys_acquire(lock) syscall(SYS_LOCK_ACQUIRE, (unsigned long)(lock))
-#define sys_release(lock) syscall(SYS_LOCK_RELEASE, (unsigned long)(lock))
+#define sys_handler(handler) (void*)(unsigned long)syscall(SYS_SET_HANDLER, (unsigned long)(handler))
 
 #define sys_tls_new() syscall(SYS_TLS_NEW)
 #define sys_tls_get(slot) (void*)(unsigned long)syscall(SYS_TLS_GET, slot)

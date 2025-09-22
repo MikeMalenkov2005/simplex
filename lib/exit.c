@@ -1,11 +1,13 @@
 #include <signal.h>
 #include <simplex.h>
 
+#include "crt.h"
+
 #define AT_EXIT_MAX 32
 
 static void (*at_exit[AT_EXIT_MAX])(void);
 static int at_exit_count = 0;
-static int at_exit_lock = -1;
+static int at_exit_lock = 0;
 
 void abort(void)
 {
@@ -15,21 +17,23 @@ void abort(void)
 
 int atexit(void (*func)(void))
 {
-  int result = 0;
+  int result = -1;
   if (func)
   {
-    while (sys_acquire(&at_exit_lock)) sys_switch();
-    if (at_exit_count >= AT_EXIT_MAX) result = -1; /* TODO: use errno! */
-    else at_exit[at_exit_count++] = func;
-    (void)sys_release(&at_exit_lock);
+    __crt_lock(&at_exit_lock);
+    if (at_exit_count < AT_EXIT_MAX)
+    {
+      at_exit[at_exit_count++] = func;
+      result = 0;
+    }
+    __crt_unlock(&at_exit_lock);
   }
-  else result = -1; /* TODO: use errno! */
   return result;
 }
 
 void exit(int status)
 {
-  while (sys_acquire(&at_exit_lock)) sys_switch();
+  __crt_lock(&at_exit_lock);
   while (at_exit_count--) at_exit[at_exit_count]();
   sys_group_exit(status);
 }

@@ -22,5 +22,5 @@ $(ASMOBJ): %.o: %.asm
 	$(ELFASM) -o $@ $<
 
 clean:
-	rm *.o $(MODULE_FILE)
+	rm *.o arch/*/*.o $(MODULE_FILE)
 

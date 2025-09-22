@@ -2,6 +2,7 @@
 
 global memcmp
 global memcpy
+global memmove
 global memset
 
 section .text
@@ -31,6 +32,28 @@ memcpy:
   mov edx, edi
   rep movsb
   mov eax, edx
+  pop edi
+  pop esi
+  ret
+
+memmove:
+  push esi
+  push edi
+  pushfd
+  mov edi, [esp + 16]
+  mov esi, [esp + 20]
+  mov ecx, [esp + 24]
+  mov edx, edi
+  cld
+  cmp esi, edi
+  jae .execute
+  std
+  add esi, ecx
+  add edi, ecx
+.execute:
+  rep movsb
+  mov eax, edx
+  popfd
   pop edi
   pop esi
   ret

@@ -1,10 +1,15 @@
 #ifndef _ERRNO_H
 #define _ERRNO_H
 
-/* int *_errno(void);
-#define errno (*_errno()) */
+/* TODO: Make POSIX compatible! */
 
-extern int errno;
+#define EDOM    1 /* Math argument out of the function's domaim */
+#define EILSEQ  2 /* Illegal byte sequence */
+#define ERANGE  3 /* Math result is not representable */
+
+int *_errno(void);
+
+#define errno (*_errno())
 
 #endif
 
