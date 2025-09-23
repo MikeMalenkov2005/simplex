@@ -3,7 +3,7 @@
 
 #include <types.h>
 
-K_BOOL K_LoadTaskImage(K_HANDLE image, K_USIZE size);
+K_BOOL K_LoadTaskImage(K_HANDLE image, K_USIZE size, K_HANDLE *entry);
 
 #endif
 

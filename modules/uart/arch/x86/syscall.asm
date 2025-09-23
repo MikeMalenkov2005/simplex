@@ -1,8 +1,18 @@
 [bits 32]
 
+extern UART_Main
+
+global __entry
 global __syscall
 
 section .text
+
+__entry:
+  push eax
+  call UART_Main
+  mov ebx, eax
+  xor eax, eax
+  int 0x80
 
 __syscall:
   push ebx

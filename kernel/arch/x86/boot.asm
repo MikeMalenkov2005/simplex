@@ -64,6 +64,7 @@ BootHeader.end:
 
 K_Init:
   cli
+  cld
   cmp eax, LOADER_MAGIC
   jne .InvalidLoader
   mov esp, K_Stack

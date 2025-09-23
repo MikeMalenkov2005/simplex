@@ -1,6 +1,7 @@
 #include "uart.h"
 
 #include <drv/uart.h>
+#include <sys/memory.h>
 
 struct UART_Buffer
 {
@@ -18,7 +19,7 @@ void UART_BufferClear(UART_Buffer *buffer)
 
 K_BOOL UART_BufferPush(UART_Buffer *buffer, K_U8 byte, K_BOOL force)
 {
-  if (buffer->Head > 0)
+  if (buffer->Head >= 0)
   {
     buffer->Buffer[buffer->Head++] = byte;
     buffer->Head &= 127;
@@ -46,17 +47,18 @@ K_BOOL UART_BufferPull(UART_Buffer *buffer, K_U8 *byte)
 static UART_Buffer RxBuffer;
 static UART_Buffer TxBuffer;
 
-void UART_Main()
+void UART_Main(const char *args)
 {
   int tid;
   UART_Command cmd;
   K_U32 index;
   K_U8 byte;
-  
+
   UART_BufferClear(&RxBuffer);
   UART_BufferClear(&TxBuffer);
   UART_Config(9600, 3);
-  
+  while (*args) UART_BufferPush(&TxBuffer, *args++, FALSE);
+
   for (tid = -1; tid; tid = sys_poll(&cmd))
   {
     if (tid == -1)

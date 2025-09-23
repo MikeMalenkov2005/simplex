@@ -19,7 +19,8 @@ void K_DebugHex(K_U16 x, K_U16 y, K_U32 value)
 
 void K_Panic(const char *message)
 {
-  (void)message;
+  K_U16 *screen = (K_HANDLE)0xB8000;
+  while (*message) *screen++ = 0x400 | (*message++ & 0xFF);
   for (;;);
 }
 

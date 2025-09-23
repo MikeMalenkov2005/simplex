@@ -8,11 +8,12 @@ K_USIZE K_FreePageCount;
 
 K_BOOL K_AllocatePage(K_HANDLE address, K_U16 flags)
 {
+  address = (K_HANDLE)K_PageDown(address); /* THIS WAS THE ULTIMATE FIX >:( */
   if (K_GetPage(address) || !K_SetPage(address, K_PAGE_EXTERNAL)) return FALSE;
   if (!K_IsPageCommited(flags)) return K_SetPage(address, flags & K_PAGE_FLAGS_MASK & ~K_PAGE_VALID);
   if (!K_FreePageCount) return !K_SetPage(address, 0);
   (void)K_SetPage(address, K_FirstFreePage | (flags & K_PAGE_FLAGS_MASK) | K_PAGE_VALID);
-  K_FirstFreePage = *(volatile K_USIZE*)address;
+  K_FirstFreePage = *(K_USIZE*)address;
   --K_FreePageCount;
   return TRUE;
 }
@@ -20,6 +21,7 @@ K_BOOL K_AllocatePage(K_HANDLE address, K_U16 flags)
 K_BOOL K_FreePage(K_HANDLE address)
 {
   K_USIZE page;
+  address = (K_HANDLE)K_PageDown(address);
   if (K_IsPageTable(address)) return FALSE;
   page = K_GetPage(address);
   if (!K_IsPageCommited(page)) return K_SetPage(address, 0);
@@ -77,7 +79,6 @@ K_HANDLE K_FindLastFreeAddress(K_USIZE size)
   K_USIZE offset;
   K_USIZE address = K_PAGE_ADDRESS_MASK;
   K_BOOL found = FALSE;
-  size = K_PageUp(size);
   if (!size) return NULL;
   while (!found && address)
   {
@@ -98,7 +99,6 @@ K_U16 K_GetRangeFlags(K_HANDLE address, K_USIZE size)
 {
   K_USIZE offset;
   K_U16 flags = (K_GetPage(address) & K_PAGE_FLAGS_MASK) | K_PAGE_VALID;
-  size = K_PageUp(size);
   for (offset = K_PAGE_SIZE; offset < size; offset += K_PAGE_SIZE)
   {
     if (K_IsPageTable(address + offset)) return 0;
@@ -110,7 +110,6 @@ K_U16 K_GetRangeFlags(K_HANDLE address, K_USIZE size)
 K_BOOL K_AllocatePages(K_HANDLE address, K_USIZE size, K_U16 flags)
 {
   K_USIZE offset;
-  size = K_PageUp(size);
   for (offset = 0; offset < size; offset += K_PAGE_SIZE)
   {
     if (!K_AllocatePage(address + offset, flags))
@@ -130,7 +129,6 @@ K_BOOL K_FreePages(K_HANDLE address, K_USIZE size)
 {
   K_USIZE offset;
   if (!K_GetRangeFlags(address, size)) return FALSE;
-  size = K_PageUp(size);
   for (offset = 0; offset < size; offset += K_PAGE_SIZE)
   {
     (void)K_FreePage(address + offset);
@@ -144,7 +142,6 @@ K_BOOL K_ChangePages(K_HANDLE address, K_USIZE size, K_U16 flags)
   K_U16 old = K_GetRangeFlags(address, size);
   if (!old) return FALSE;
   if (old == (flags | K_PAGE_VALID)) return TRUE;
-  size = K_PageUp(size);
   for (offset = 0; offset < size; offset += K_PAGE_SIZE)
   {
     if (!K_ChangePage(address + offset, flags))

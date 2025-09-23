@@ -8,7 +8,7 @@ ASMOBJ = $(patsubst %.asm,%.o,$(ASMSRC))
 
 MODULE_FILE = $(ROOTDIR)/uart.sys
 
-LDFLAGS += -e UART_Main
+LDFLAGS += -e __entry
 
 .PHONY: clean
 
