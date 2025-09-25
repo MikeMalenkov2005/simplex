@@ -3,18 +3,19 @@
 
 int main()
 {
-  UART_Command cmd;
-  cmd.Header.PortIndex = 0;
-  cmd.Header.Command = UART_CMD_TX;
-  cmd.RxTx.ByteCount = 7;
-  cmd.RxTx.Bytes[0] = '\r';
-  cmd.RxTx.Bytes[1] = '\n';
-  cmd.RxTx.Bytes[2] = 'H';
-  cmd.RxTx.Bytes[3] = 'e';
-  cmd.RxTx.Bytes[4] = 'l';
-  cmd.RxTx.Bytes[5] = 'l';
-  cmd.RxTx.Bytes[6] = 'o';
-  sys_send(&cmd, 1);
+  DSP_Message msg = { 0 };
+  msg.Header.Flags = DSP_TX;
+  msg.Header.Bytes = 9;
+  msg.Data[0] = '\r';
+  msg.Data[1] = '\n';
+  msg.Data[2] = 'H';
+  msg.Data[3] = 'e';
+  msg.Data[4] = 'l';
+  msg.Data[5] = 'l';
+  msg.Data[6] = 'o';
+  msg.Data[7] = '\r';
+  msg.Data[8] = '\n';
+  UART_Send(&msg);
   for (;;);
   return 0;
 }

@@ -50,7 +50,7 @@ static UART_Buffer TxBuffer;
 void UART_Main(const char *args)
 {
   int tid;
-  UART_Command cmd;
+  DSP_Message msg;
   K_U32 index;
   K_U8 byte;
 
@@ -59,29 +59,31 @@ void UART_Main(const char *args)
   UART_Config(9600, 3);
   while (*args) UART_BufferPush(&TxBuffer, *args++, FALSE);
 
-  for (tid = -1; tid; tid = sys_poll(&cmd))
+  for (tid = -1; tid; tid = sys_poll(&msg))
   {
     if (tid == -1)
     {
       while (UART_LineState() & 1) (void)UART_BufferPush(&RxBuffer, UART_RxByte(), TRUE);
       while ((UART_LineState() & 0x20) && UART_BufferPull(&TxBuffer, &byte)) UART_TxByte(byte);
     }
-    else switch(cmd.Header.Command)
+    else switch(msg.Header.Flags) /* The most simple implementation */
     {
-    case UART_CMD_CFG:
-      UART_Config(cmd.Cfg.BaudRate, cmd.Cfg.LineControl);
+    case DSP_CFG:
+      UART_Config(((UART_CfgData*)msg.Data)->BaudRate, ((UART_CfgData*)msg.Data)->LineControl);
       break;
-    case UART_CMD_RX:
-      if (cmd.RxTx.ByteCount > UART_BYTE_COUNT_MAX) cmd.RxTx.ByteCount = UART_BYTE_COUNT_MAX;
-      for (index = 0; index < cmd.RxTx.ByteCount && UART_BufferPull(&RxBuffer, cmd.RxTx.Bytes + index); ++index);
-      cmd.RxTx.ByteCount = index;
-      (void)sys_send(&cmd, tid);
+    case DSP_RX:
+      if (msg.Header.Bytes > sizeof msg.Data) msg.Header.Bytes = sizeof msg.Data;
+      for (index = 0; index < msg.Header.Bytes && UART_BufferPull(&RxBuffer, msg.Data + index); ++index);
+      msg.Header.Bytes = index;
+      msg.Header.Flags |= DSP_ANS;
+      (void)sys_send(&msg, tid);
       break;
-    case UART_CMD_TX:
-      if (cmd.RxTx.ByteCount > UART_BYTE_COUNT_MAX) cmd.RxTx.ByteCount = UART_BYTE_COUNT_MAX;
-      for (index = 0; index < cmd.RxTx.ByteCount && UART_BufferPush(&TxBuffer, cmd.RxTx.Bytes[index], FALSE); ++index);
-      cmd.RxTx.ByteCount = index;
-      (void)sys_send(&cmd, tid);
+    case DSP_TX:
+      if (msg.Header.Bytes > sizeof msg.Data) msg.Header.Bytes = sizeof msg.Data;
+      for (index = 0; index < msg.Header.Bytes && UART_BufferPush(&TxBuffer, msg.Data[index], FALSE); ++index);
+      msg.Header.Bytes = index;
+      msg.Header.Flags |= DSP_ANS;
+      (void)sys_send(&msg, tid);
       break;
     }
   }
