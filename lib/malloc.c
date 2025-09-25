@@ -50,6 +50,22 @@ static void heap_defrag(block_t *block)
   }
 }
 
+static void heap_split(block_t *block, size_t size) /* Assumes size is 16 byte aligned and not zero. */
+{
+  block_t *second;
+  if (block->free && block->size > size + sizeof *block)
+  {
+    second = (void*)(block + 1) + size;
+    second->prev = block;
+    second->next = block->next;
+    second->size = block->size - size - sizeof *block;
+    second->free = 1;
+    block->next = second;
+    block->size = size;
+    if (block == heap) block->prev = second;
+  }
+}
+
 static void heap_free(void *ptr)
 {
   block_t *block = ptr - sizeof *block;
@@ -85,6 +101,7 @@ static void *heap_alloc(size_t size)
     }
     block->size = size;
   }
+  heap_split(block, size);
   block->free = 0;
   return block + 1;
 }
