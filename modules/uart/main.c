@@ -49,6 +49,7 @@ static UART_Buffer TxBuffer;
 
 void UART_Main(const char *args)
 {
+  UART_CfgData *cfg;
   int tid;
   DSP_Message msg;
   K_U32 index;
@@ -69,7 +70,10 @@ void UART_Main(const char *args)
     else switch(msg.Header.Flags) /* The most simple implementation */
     {
     case DSP_CFG:
-      UART_Config(((UART_CfgData*)msg.Data)->BaudRate, ((UART_CfgData*)msg.Data)->LineControl);
+      cfg = (void*)msg.Data;
+      UART_Config(cfg->BaudRate, cfg->LineControl);
+      msg.Header.Flags |= DSP_ANS;
+      (void)sys_send(&msg, tid);
       break;
     case DSP_RX:
       if (msg.Header.Bytes > sizeof msg.Data) msg.Header.Bytes = sizeof msg.Data;
@@ -83,6 +87,10 @@ void UART_Main(const char *args)
       for (index = 0; index < msg.Header.Bytes && UART_BufferPush(&TxBuffer, msg.Data[index], FALSE); ++index);
       msg.Header.Bytes = index;
       msg.Header.Flags |= DSP_ANS;
+      (void)sys_send(&msg, tid);
+      break;
+    default:
+      msg.Header.Flags |= DSP_ERR | DSP_ANS;
       (void)sys_send(&msg, tid);
       break;
     }
