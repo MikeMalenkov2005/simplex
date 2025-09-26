@@ -1,5 +1,3 @@
-
-
 Data Stream Protocol
 --------------------
 
@@ -27,4 +25,14 @@ The general header format:
 1. a 2-byte sequence number or zero
 2. a 1-byte message flags (data direction or configuration, is stream id present, is response, and so on)
 3. a 1-byte byte count (can not be greater then the maximum body size)
+
+The general config message body format:
+1. a 4-byte config command id
+2. command specific fields
+
+Allocated config message command ids:
+- Invalid command: `DSP_CFG_NONE` = `0`
+- Seek command: `DSP_CFG_SEEK` = `1`
+- Flush command: `DSP_CFG_FLUSH` = `2`
+- Driver range: `DSP_CFG_DRVLO` - `DSP_CFG_DRVHI` = `0x80000000` - `0xFFFFFFFF`
 

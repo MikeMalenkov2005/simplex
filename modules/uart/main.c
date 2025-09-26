@@ -49,7 +49,7 @@ static UART_Buffer TxBuffer;
 
 void UART_Main(const char *args)
 {
-  UART_CfgData *cfg;
+  UART_Cfg *cfg;
   int tid;
   DSP_Message msg;
   K_U32 index;
@@ -62,16 +62,21 @@ void UART_Main(const char *args)
 
   for (tid = -1; tid; tid = sys_poll(&msg))
   {
-    if (tid == -1)
-    {
-      while (UART_LineState() & 1) (void)UART_BufferPush(&RxBuffer, UART_RxByte(), TRUE);
-      while ((UART_LineState() & 0x20) && UART_BufferPull(&TxBuffer, &byte)) UART_TxByte(byte);
-    }
-    else switch(msg.Header.Flags) /* The most simple implementation */
+    while (UART_LineState() & 1) (void)UART_BufferPush(&RxBuffer, UART_RxByte(), TRUE);
+    while ((UART_LineState() & 0x20) && UART_BufferPull(&TxBuffer, &byte)) UART_TxByte(byte);
+    if (tid != -1) switch(msg.Header.Flags) /* The most simple implementation */
     {
     case DSP_CFG:
       cfg = (void*)msg.Data;
-      UART_Config(cfg->BaudRate, cfg->LineControl);
+      switch (cfg->Command)
+      {
+      case UART_CFG_INIT:
+        UART_Config(cfg->Init.BaudRate, cfg->Init.LineControl);
+        break;
+      default:
+        msg.Header.Flags |= DSP_ERR;
+        break;
+      }
       msg.Header.Flags |= DSP_ANS;
       (void)sys_send(&msg, tid);
       break;

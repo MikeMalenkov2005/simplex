@@ -17,13 +17,25 @@
 #define UART_LINE_MARK  (5 << 3)
 #define UART_LINE_SPACE (7 << 3)
 
-struct UART_CfgData
+#define UART_CFG_INIT (DSP_CFG_DRVLO | 0)
+
+struct UART_CfgInit
 {
+  K_U32 Command;
   K_U32 BaudRate;
   K_U32 LineControl;
 };
 
-typedef struct UART_CfgData UART_CfgData;
+typedef struct UART_CfgInit UART_CfgInit;
+
+union UART_Cfg
+{
+  K_U32 Command;
+  DSP_Cfg Common;
+  UART_CfgInit Init;
+};
+
+typedef union UART_Cfg UART_Cfg;
 
 #define UART_Send(msg)  sys_send(msg, 1)
 

@@ -34,5 +34,29 @@ struct DSP_Message
 
 typedef struct DSP_Message DSP_Message;
 
+#define DSP_CFG_NONE  0
+#define DSP_CFG_SEEK  1
+#define DSP_CFG_FLUSH 2
+
+#define DSP_CFG_DRVLO 0x80000000U
+#define DSP_CFG_DRVHI 0xFFFFFFFFU
+
+struct DSP_CfgSeek
+{
+  K_U32 Command;
+  K_U32 Origin;
+  K_U64S Offset;
+};
+
+typedef struct DSP_CfgSeek DSP_CfgSeek;
+
+union DSP_Cfg
+{
+  K_U32 Command;
+  DSP_CfgSeek Seek;
+};
+
+typedef union DSP_Cfg DSP_Cfg;
+
 #endif
 
