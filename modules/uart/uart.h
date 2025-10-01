@@ -1,7 +1,7 @@
 #ifndef _UART_H
 #define _UART_H
 
-#include <types.h>
+#include <sys/types.h>
 
 void UART_Config(K_U32 baud, K_U8 lcr);
 

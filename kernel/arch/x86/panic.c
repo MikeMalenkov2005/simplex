@@ -1,4 +1,4 @@
-#include <types.h>
+#include <sys/types.h>
 
 void K_Debug(K_U16 x, K_U16 y, K_U8 *string)
 {

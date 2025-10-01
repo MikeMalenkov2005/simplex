@@ -1,5 +1,4 @@
 #include "memory.h"
-#include "types.h"
 
 extern void __end;
 

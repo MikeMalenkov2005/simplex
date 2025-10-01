@@ -1,5 +1,5 @@
-#ifndef _TYPES_H
-#define _TYPES_H
+#ifndef _SYS_TYPES_H
+#define _SYS_TYPES_H
 
 typedef unsigned char   K_U8;
 typedef unsigned short  K_U16;
@@ -18,7 +18,11 @@ typedef K_S32 K_BOOL;
 union K_U64S
 {
   K_USIZE Value;
-  struct { K_U32 Low, High; }; /* TODO: Change for BigEndian! */
+#ifndef K_BIG_ENDIAN
+  struct { K_U32 Low, High; };
+#else
+  struct { K_U32 High, Low; };
+#endif
 };
 
 typedef union K_U64S K_U64S;
@@ -26,7 +30,11 @@ typedef union K_U64S K_U64S;
 union K_S64S
 {
   K_SSIZE Value;
-  struct { K_U32 Low, High; }; /* TODO: Change for BigEndian! */
+#ifndef K_BIG_ENDIAN
+  struct { K_U32 Low, High; };
+#else
+  struct { K_U32 High, Low; };
+#endif
 };
 
 typedef union K_S64S K_S64S;

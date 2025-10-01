@@ -1,7 +1,7 @@
 #ifndef _K_MEMORY_H
 #define _K_MEMORY_H
 
-#include <types.h>
+#include <sys/types.h>
 #include <sys/limits.h>
 
 #define K_PAGE_FLAGS_MASK   (K_PAGE_SIZE - 1)

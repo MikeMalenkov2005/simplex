@@ -1,7 +1,7 @@
 #ifndef _X86_BOOT_H
 #define _X86_BOOT_H
 
-#include <types.h>
+#include <sys/types.h>
 
 struct K_BootInfo
 {

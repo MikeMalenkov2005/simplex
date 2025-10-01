@@ -1,7 +1,7 @@
 #ifndef _X86_ISR_H
 #define _X86_ISR_H
 
-#include <types.h>
+#include <sys/types.h>
 
 struct ISR_Frame
 {

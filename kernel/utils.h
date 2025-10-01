@@ -1,7 +1,7 @@
 #ifndef _K_UTILS_H
 #define _K_UTILS_H
 
-#include <types.h>
+#include <sys/types.h>
 
 void *K_ZeroMemory(void *memory, K_USIZE size);
 

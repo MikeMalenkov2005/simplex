@@ -1,7 +1,7 @@
 #ifndef _X86_IDT_H
 #define _X86_IDT_H
 
-#include <types.h>
+#include <sys/types.h>
 
 void IDT_Load();
 

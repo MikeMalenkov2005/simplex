@@ -8,7 +8,6 @@
 #include "task.h"
 #include "../../utils.h"
 #include "../../loader.h"
-#include "types.h"
 
 extern void K_Idle;
 extern K_USIZE K_IdleSize;

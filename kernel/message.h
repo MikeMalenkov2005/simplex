@@ -1,7 +1,7 @@
 #ifndef _K_MESSAGE_H
 #define _K_MESSAGE_H
 
-#include <types.h>
+#include <sys/types.h>
 #include <sys/limits.h>
 
 struct K_MessagePayload

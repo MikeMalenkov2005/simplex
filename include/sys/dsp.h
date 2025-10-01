@@ -2,7 +2,7 @@
 #define _SYS_DSP_H
 
 #include <sys/limits.h>
-#include <types.h>
+#include <sys/types.h>
 
 #define DSP_READ  1 /* Request to read data             */
 #define DSP_WRITE 2 /* Request to write data            */

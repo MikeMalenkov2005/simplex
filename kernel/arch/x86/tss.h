@@ -1,7 +1,7 @@
 #ifndef _X86_TSS_H
 #define _X86_TSS_H
 
-#include <types.h>
+#include <sys/types.h>
 
 struct TSS
 {

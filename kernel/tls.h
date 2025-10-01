@@ -1,7 +1,7 @@
 #ifndef _K_TLS_H
 #define _K_TLS_H
 
-#include <types.h>
+#include <sys/types.h>
 #include <sys/limits.h>
 
 #define K_TLS_INVALID_INDEX   (~(K_USIZE)0)

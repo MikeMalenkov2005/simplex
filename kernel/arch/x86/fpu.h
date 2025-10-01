@@ -1,7 +1,7 @@
 #ifndef _X86_FPU_H
 #define _X86_FPU_H
 
-#include <types.h>
+#include <sys/types.h>
 
 void FPU_Init();
 void FPU_Save(K_HANDLE fpu);

@@ -1,7 +1,7 @@
 #ifndef _SYS_ELF_H
 #define _SYS_ELF_H
 
-#include <types.h>
+#include <sys/types.h>
 
 typedef K_U32 Elf32_Addr;
 typedef K_U32 Elf32_Off;
