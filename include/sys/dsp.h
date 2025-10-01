@@ -4,59 +4,58 @@
 #include <sys/limits.h>
 #include <types.h>
 
-#define DSP_OPT 0x80
-#define DSP_ANS 0x40
-#define DSP_CMD 0x03
+#define DSP_READ  1 /* Request to read data             */
+#define DSP_WRITE 2 /* Request to write data            */
+#define DSP_SEEK  3 /* Request to change position       */
+#define DSP_CLOSE 4 /* Request to close a stream        */
+#define DSP_OPEN  5 /* Request to open a stream         */
+#define DSP_FLUSH 6 /* Request to flush a stream buffer */
+#define DSP_REPLY 7 /* Reply with data or error         */
 
-#define DSP_CFG 0
-#define DSP_RX  1
-#define DSP_TX  2
-#define DSP_ERR 3
+#define DSP_USER  128 /* Start of a user defined range  */
 
 struct DSP_Header
 {
-  K_U16 Index;  /* sequence number  */
-  K_U8 Flags;   /* message flags    */
-  K_U8 Bytes;   /* byte count       */
+  K_U16 Stream; /* The Stream/Device ID */
+  K_U8  Action; /* The Action/Packet ID */
+  K_U8  Length; /* The Data Size  (err) */
 };
 
 typedef struct DSP_Header DSP_Header;
 
-struct DSP_Message
+struct DSP_Data
 {
   DSP_Header Header;
-  union
-  {
-    K_U8 Data[K_MESSAGE_SIZE - 4];
-    struct { K_U32 StreamID; K_U8 Data[K_MESSAGE_SIZE - 8]; } Optional;
-  };
+  K_U8 Payload[K_MESSAGE_SIZE - 4];
 };
 
-typedef struct DSP_Message DSP_Message;
+typedef struct DSP_Data DSP_Data;
 
-#define DSP_CFG_NONE  0
-#define DSP_CFG_SEEK  1
-#define DSP_CFG_FLUSH 2
+#define DSP_SEEK_SET  0 /* Offset from start    */
+#define DSP_SEEK_CUR  1 /* Offset from position */
+#define DSP_SEEK_END  2 /* Offset from end      */
 
-#define DSP_CFG_DRVLO 0x80000000U
-#define DSP_CFG_DRVHI 0xFFFFFFFFU
-
-struct DSP_CfgSeek
+struct DSP_Seek
 {
-  K_U32 Command;
-  K_U32 Origin;
+  DSP_Header Header;
+  K_U32 SeekMode;
   K_U64S Offset;
 };
 
-typedef struct DSP_CfgSeek DSP_CfgSeek;
+typedef struct DSP_Seek DSP_Seek;
 
-union DSP_Cfg
+#define DSP_SUCCESS 0
+#define DSP_PARTIAL 254
+#define DSP_FAILURE 255
+
+union DSP_Packet
 {
-  K_U32 Command;
-  DSP_CfgSeek Seek;
+  DSP_Header Header;
+  DSP_Data Data;
+  DSP_Seek Seek;
 };
 
-typedef union DSP_Cfg DSP_Cfg;
+typedef union DSP_Packet DSP_Packet;
 
 #endif
 

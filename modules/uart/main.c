@@ -47,56 +47,47 @@ K_BOOL UART_BufferPull(UART_Buffer *buffer, K_U8 *byte)
 static UART_Buffer RxBuffer;
 static UART_Buffer TxBuffer;
 
+void UART_Reply(UART_Packet *packet, K_U8 length, int tid)
+{
+  packet->Header.Action = DSP_REPLY;
+  packet->Header.Length = length;
+  (void)sys_send(&packet, tid);
+}
+
 void UART_Main(const char *args)
 {
-  UART_Cfg *cfg;
-  int tid;
-  DSP_Message msg;
+  UART_Packet packet;
   K_U32 index;
   K_U8 byte;
+  int tid;
 
   UART_BufferClear(&RxBuffer);
   UART_BufferClear(&TxBuffer);
   UART_Config(9600, 3);
   while (*args) UART_BufferPush(&TxBuffer, *args++, FALSE);
 
-  for (tid = -1; tid; tid = sys_poll(&msg))
+  for (tid = -1; tid; tid = sys_poll(&packet))
   {
     while (UART_LineState() & 1) (void)UART_BufferPush(&RxBuffer, UART_RxByte(), TRUE);
     while ((UART_LineState() & 0x20) && UART_BufferPull(&TxBuffer, &byte)) UART_TxByte(byte);
-    if (tid != -1) switch(msg.Header.Flags) /* The most simple implementation */
+    if (tid != -1) switch(packet.Header.Action) /* The most simple implementation */
     {
-    case DSP_CFG:
-      cfg = (void*)msg.Data;
-      switch (cfg->Command)
-      {
-      case UART_CFG_INIT:
-        UART_Config(cfg->Init.BaudRate, cfg->Init.LineControl);
-        break;
-      default:
-        msg.Header.Flags |= DSP_ERR;
-        break;
-      }
-      msg.Header.Flags |= DSP_ANS;
-      (void)sys_send(&msg, tid);
+    case UART_CFG:
+      UART_Config(packet.Config.BaudRate, packet.Config.LineControl);
+      UART_Reply(&packet, DSP_SUCCESS, tid);
       break;
-    case DSP_RX:
-      if (msg.Header.Bytes > sizeof msg.Data) msg.Header.Bytes = sizeof msg.Data;
-      for (index = 0; index < msg.Header.Bytes && UART_BufferPull(&RxBuffer, msg.Data + index); ++index);
-      msg.Header.Bytes = index;
-      msg.Header.Flags |= DSP_ANS;
-      (void)sys_send(&msg, tid);
+    case DSP_READ:
+      if (packet.Header.Length > sizeof packet.Common.Data) packet.Header.Length = sizeof packet.Common.Data;
+      for (index = 0; index < packet.Header.Length && UART_BufferPull(&RxBuffer, packet.Common.Data.Payload + index); ++index);
+      UART_Reply(&packet, index, tid);
       break;
-    case DSP_TX:
-      if (msg.Header.Bytes > sizeof msg.Data) msg.Header.Bytes = sizeof msg.Data;
-      for (index = 0; index < msg.Header.Bytes && UART_BufferPush(&TxBuffer, msg.Data[index], FALSE); ++index);
-      msg.Header.Bytes = index;
-      msg.Header.Flags |= DSP_ANS;
-      (void)sys_send(&msg, tid);
+    case DSP_WRITE:
+      if (packet.Header.Length > sizeof packet.Common.Data) packet.Header.Length = sizeof packet.Common.Data;
+      for (index = 0; index < packet.Header.Length && UART_BufferPush(&TxBuffer, packet.Common.Data.Payload[index], FALSE); ++index);
+      UART_Reply(&packet, index, tid);
       break;
     default:
-      msg.Header.Flags |= DSP_ERR | DSP_ANS;
-      (void)sys_send(&msg, tid);
+      UART_Reply(&packet, DSP_FAILURE, tid);
       break;
     }
   }

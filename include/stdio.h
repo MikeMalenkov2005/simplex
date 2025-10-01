@@ -7,7 +7,7 @@ typedef struct FILE FILE;
 
 struct fpos_t
 {
-#if ULONG_MAX > UINT_MAX
+#if ULONG_MAX > 0xFFFFFFFFUL
   unsigned long value;
 #else
   unsigned long low;

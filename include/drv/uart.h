@@ -17,27 +17,27 @@
 #define UART_LINE_MARK  (5 << 3)
 #define UART_LINE_SPACE (7 << 3)
 
-#define UART_CFG_INIT (DSP_CFG_DRVLO | 0)
+#define UART_CFG  (DSP_USER | 0)
 
-struct UART_CfgInit
+struct UART_Cfg
 {
-  K_U32 Command;
+  DSP_Header Header;
   K_U32 BaudRate;
   K_U32 LineControl;
 };
 
-typedef struct UART_CfgInit UART_CfgInit;
+typedef struct UART_Cfg UART_Cfg;
 
-union UART_Cfg
+union UART_Packet
 {
-  K_U32 Command;
-  DSP_Cfg Common;
-  UART_CfgInit Init;
+  DSP_Header Header;
+  DSP_Packet Common;
+  UART_Cfg Config;
 };
 
-typedef union UART_Cfg UART_Cfg;
+typedef union UART_Packet UART_Packet;
 
-#define UART_Send(msg)  sys_send(msg, 1)
+#define UART_Send(packet) sys_send(packet, 1)
 
 #endif
 

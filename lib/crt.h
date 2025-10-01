@@ -10,7 +10,9 @@ struct __crt_info
   int __crt_errno;
 };
 
-int __crt_lock(int *lock);
+int __crt_atomic_swap(int *var, int val);
+
+void __crt_lock(int *lock);
 void __crt_unlock(int *lock);
 
 int __crt_brk(void *addr);

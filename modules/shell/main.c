@@ -3,19 +3,22 @@
 
 int main()
 {
-  DSP_Message msg = { 0 };
-  msg.Header.Flags = DSP_TX;
-  msg.Header.Bytes = 9;
-  msg.Data[0] = '\r';
-  msg.Data[1] = '\n';
-  msg.Data[2] = 'H';
-  msg.Data[3] = 'e';
-  msg.Data[4] = 'l';
-  msg.Data[5] = 'l';
-  msg.Data[6] = 'o';
-  msg.Data[7] = '\r';
-  msg.Data[8] = '\n';
-  UART_Send(&msg);
+  DSP_Packet packet = { 0 };
+  packet.Header.Action = DSP_WRITE;
+  packet.Header.Length = 9;
+  packet.Data.Payload[0] = '\r';
+  packet.Data.Payload[1] = '\n';
+  packet.Data.Payload[2] = 'H';
+  packet.Data.Payload[3] = 'e';
+  packet.Data.Payload[4] = 'l';
+  packet.Data.Payload[5] = 'l';
+  packet.Data.Payload[6] = 'o';
+  packet.Data.Payload[7] = '\r';
+  packet.Data.Payload[8] = '\n';
+  UART_Send(&packet);
+  if (sys_wait(&packet) == 1)
+  {
+  }
   for (;;);
   return 0;
 }

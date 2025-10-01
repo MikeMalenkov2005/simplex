@@ -26,6 +26,16 @@ void __crt_init(void)
   __crt_brk_limit = (__crt_brk_value = __crt_brk_base) + K_PAGE_SIZE;
 }
 
+void __crt_lock(int *lock)
+{
+  while (__crt_atomic_swap(lock, 1)) sys_switch();
+}
+
+void __crt_unlock(int *lock)
+{
+  (void)__crt_atomic_swap(lock, 0);
+}
+
 static void *__crt_sbrk_internal(ptrdiff_t incr)
 {
   ptrdiff_t size;

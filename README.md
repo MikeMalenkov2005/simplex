@@ -1,38 +1,27 @@
-Data Stream Protocol
---------------------
+Drived Streaming Protocol
+-------------------------
 
-The Data Stream Protocol (DSP) defines the general message structure utilized
-for data streaming between tasks.
+The Drived Streaming Protocol (DSP) defines the general message structure
+utilized for data streaming between through driver tasks.
 
-The DSP messages are divided in two mandatory and one optional parts:
-1. a 4-byte message header
-2. an optional 4-byte stream id
-3. a message body (data)
+The general packet structure:
+1. 2-byte stream/device id
+2. 1-byte action/packet id
+3. 1-byte the payload size
+4. the payload data
 
-The message header is used for providing the folowing information:
-1. the presence of the optional stream id
-2. the data direction for this message
-3. a sequence number (to avoid sending stream id multiple times)
+The stream id is used to distinguish multiple streams opened for one task.
 
-If a streaming task supports configuration messages the header should indicate
-whether the message is a data message or a configuration message.
+The payload data depends on the action id and the payload size.
 
-The stream id is used for distinguishing streams utilized by the same task.
+The payload size can be used to indicate if an error has occured.
 
-Responses to the 
+If the action is any type of request except read or write,
+the payload size should be set to zero by the client and ignored by the driver.
 
-The general header format:
-1. a 2-byte sequence number or zero
-2. a 1-byte message flags (data direction or configuration, is stream id present, is response, and so on)
-3. a 1-byte byte count (can not be greater then the maximum body size)
+If the action is a reply then the payload size specifies,
+how many bytes was successfuly read or written by the driver.
 
-The general config message body format:
-1. a 4-byte config command id
-2. command specific fields
-
-Allocated config message command ids:
-- Invalid command: `DSP_CFG_NONE` = `0`
-- Seek command: `DSP_CFG_SEEK` = `1`
-- Flush command: `DSP_CFG_FLUSH` = `2`
-- Driver range: `DSP_CFG_DRVLO` - `DSP_CFG_DRVHI` = `0x80000000` - `0xFFFFFFFF`
+All action ids from 0 upto 127 are reserved by the protocol.
+Action ids from 128 upto 255 can be utilized for driver-specific actions.
 
