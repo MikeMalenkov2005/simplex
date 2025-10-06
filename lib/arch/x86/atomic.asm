@@ -10,3 +10,9 @@ __crt_atomic_swap:
   xchg eax, [edx]
   ret
 
+__crt_atomic_get_add:
+  mov edx, [esp + 4]
+  mov eax, [esp + 8]
+  lock xadd [edx], eax
+  ret
+
