@@ -1,4 +1,5 @@
 #include "task.h"
+#include "share.h"
 #include "timer.h"
 #include "memory.h"
 #include "tls.h"
@@ -16,7 +17,8 @@ extern void K_LoadContext(K_HANDLE context);
 
 void K_ClearTaskSlot(K_Task *task)
 {
-  task->tls = NULL;
+  task->pTLS = NULL;
+  task->pShareInfo = NULL;
   task->pMessageQueue = NULL;
   task->WaitInfo = NULL;
   task->PageMap = NULL;
@@ -81,7 +83,8 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
     }
 
     if (map != task->PageMap) K_SetPageMap(task->PageMap);
-    if (!(task->tls = K_CreateTLS((flags & K_TASK_THREAD) ? K_TaskSlots[K_CurrentSlot].tls : NULL)) ||
+    if (!(task->pTLS = K_CreateTLS((flags & K_TASK_THREAD) ? K_TaskSlots[K_CurrentSlot].pTLS : NULL)) ||
+        !(task->pShareInfo = K_CreateShareInfo()) ||
         !(task->pMessageQueue = K_CreateMessageQueue()) ||
         !(task->Context = K_CreateContext(stack, flags))) 
     {
@@ -118,7 +121,8 @@ K_BOOL K_DeleteTask(K_Task *task)
   if (task->Flags & K_TASK_THREAD)
   {
     if (map != task->PageMap) K_SetPageMap(task->PageMap);
-    K_DeleteTLS(task->tls);
+    K_DeleteTLS(task->pTLS);
+    K_DeleteShareInfo(task->pShareInfo);
     K_DeleteMessageQueue(task->pMessageQueue);
     K_DeleteContext(task->Context);
     if (map != task->PageMap) K_SetPageMap(map);

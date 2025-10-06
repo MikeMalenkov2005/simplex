@@ -1,4 +1,5 @@
 #include "syscall.h"
+#include "share.h"
 
 #define __CRT_MAP_FLAGS
 
@@ -178,13 +179,13 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     task->Handler = (K_HANDLE)arg1;
     break;
   case SYS_TLS_NEW:
-    K_SetTaskR0(task, K_TLSNewEntry(task->tls));
+    K_SetTaskR0(task, K_TLSNewEntry(task->pTLS));
     break;
   case SYS_TLS_GET:
-    K_SetTaskR0(task, K_TLSGetEntry(task->tls, arg1));
+    K_SetTaskR0(task, K_TLSGetEntry(task->pTLS, arg1));
     break;
   case SYS_TLS_SET:
-    if (K_TLSSetEntry(task->tls, arg1, arg2)) K_SetTaskR0(task, 0);
+    if (K_TLSSetEntry(task->pTLS, arg1, arg2)) K_SetTaskR0(task, 0);
     break;
   case SYS_GROUP_EXIT:
     (void)K_DeleteTask(K_GetMainTask(task->GroupID));
@@ -207,7 +208,8 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     if (K_CallChangeMapping((K_HANDLE)arg1, arg2, arg3)) K_SetTaskR0(task, 0);
     break;
   case SYS_SHARE:
-    /* TODO: Implement memory sharing (probobly for modules only) */
+    /* TODO: Test the implementation!!! */
+    K_SetTaskR0(task, (K_USIZE)K_ShareMemory(arg3, (K_HANDLE)arg1, arg2) ^ !!arg2);
     break;
   case SYS_IRQ_WAIT:
     K_SetTaskR0(task, 0);
