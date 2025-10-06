@@ -41,7 +41,8 @@ long __syscall(long number, long arg1, long arg2, long arg3);
 #define sys_map(address, size, flags) (void*)(unsigned long)syscall(SYS_MAP, (unsigned long)(address), size, flags)
 #define sys_free(address, size) syscall(SYS_FREE, (unsigned long)(address), size)
 #define sys_remap(address, size, flags) syscall(SYS_REMAP, (unsigned long)(address), size, flags)
-#define sys_share(address, size, tid) syscall(SYS_SHARE, (unsigned long)(address), size, tid)
+#define sys_share(address, size, tid) (void*)(unsigned long)syscall(SYS_SHARE, (unsigned long)(address), size, tid)
+#define sys_unshare(address, tid) (!!sys_share(address, 0, tid))
 
 #define sys_irq_wait(irq) syscall(SYS_IRQ_WAIT, irq)
 #define sys_irq_exit() syscall(SYS_IRQ_EXIT)

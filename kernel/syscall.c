@@ -209,7 +209,11 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     break;
   case SYS_SHARE:
     /* TODO: Test the implementation!!! */
-    K_SetTaskR0(task, (K_USIZE)K_ShareMemory(arg3, (K_HANDLE)arg1, arg2) ^ !!arg2);
+    if (K_IsUserRange((K_HANDLE)arg1, arg2, 0) && K_IsPageCommited(K_GetRangeFlags((K_HANDLE)arg1, arg2)))
+    {
+      K_SetTaskR0(task, (K_USIZE)K_ShareMemory(arg3, (K_HANDLE)arg1, arg2));
+    }
+    else K_SetTaskR0(task, 0);
     break;
   case SYS_IRQ_WAIT:
     K_SetTaskR0(task, 0);
