@@ -5,6 +5,7 @@
 #include "fpu.h"
 #include "isr.h"
 #include "mmu.h"
+#include "pit.h"
 #include "task.h"
 #include "../../utils.h"
 #include "../../loader.h"
@@ -80,6 +81,7 @@ void K_ArchInit(K_BootInfo *info, ISR_Frame *frame)
   TSS_Init(&K_MainTSS, &K_Stack);
   GDT_Init(&K_MainTSS);
   
+  PIT_Init();
   CPUID_Init();
   FPU_Init();
 

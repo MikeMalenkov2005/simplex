@@ -10,5 +10,7 @@
 #define K_MESSAGE_LIMIT 455
 #define K_MESSAGE_SIZE  32
 
+#define K_TIMER_HERZ  1000
+
 #endif
 
