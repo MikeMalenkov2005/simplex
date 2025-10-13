@@ -8,6 +8,7 @@
 #define K_TASK_LIMIT  1024
 
 #define K_TASK_INVALID_ID (~(K_U32)0)
+#define K_TASK_MAX_GROUP_ID (K_TASK_INVALID_ID >> 1)
 
 #define K_TASK_MODULE (1 << 0)
 #define K_TASK_THREAD (1 << 1)
@@ -27,9 +28,10 @@ struct K_Task
   K_HANDLE PageMap;
   K_HANDLE Context;
   K_HANDLE Handler;
-  K_U32 ParentID;
-  K_U32 GroupID;
-  K_U32 TaskID;
+  K_U32 ParentID;   /* POSIX: parent thread id  */
+  K_U32 TaskID;     /* POSIX: thread id         */
+  K_U32 GroupID;    /* POSIX: process id        */
+  K_U32 ClusterID;  /* POSIX: process group id  */
   K_U16 Flags;
   K_U16 Mode;
 };

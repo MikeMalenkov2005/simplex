@@ -25,8 +25,9 @@ void K_ClearTaskSlot(K_Task *task)
   task->Context = NULL;
   task->Handler = NULL;
   task->ParentID = K_TASK_INVALID_ID;
-  task->GroupID = K_TASK_INVALID_ID;
   task->TaskID = K_TASK_INVALID_ID;
+  task->GroupID = K_TASK_INVALID_ID;
+  task->ClusterID = K_TASK_INVALID_ID;
   task->Flags = 0;
   task->Mode = 0;
 }
@@ -61,7 +62,8 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
   K_HANDLE map = K_GetPageMap();
   K_Task *task = NULL;
   K_U32 i = K_TASK_LIMIT;
-  if (K_CurrentTaskIRQ || K_NextTaskID == K_TASK_INVALID_ID) return NULL;
+  if (K_CurrentTaskIRQ || K_NextTaskID == K_TASK_INVALID_ID) return NULL; /* can't create new task */
+  if (K_NextGroupID > K_TASK_MAX_GROUP_ID && (K_CurrentSlot >= K_TASK_LIMIT || (flags & K_TASK_THREAD))) return NULL; /* can't create new group */
   while (i--) if (!K_TaskSlots[i].Mode)
   {
     task = K_TaskSlots + i;
