@@ -1,4 +1,5 @@
 .vscode/
+iso/
 compile_flags.txt
 *.img
 *.iso
