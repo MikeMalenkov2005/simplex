@@ -1,3 +1,76 @@
+SIMPLEX
+=======
+
+SIMPLEX is a simplistic OS based on microkernel achitecture.
+
+System Modules
+--------------
+
+- `uart` is a UART driver that uses the DSP for communication.
+- `shell` is a simple command processor (shell).
+
+Kernel Features
+---------------
+
+- System Module Loading
+- Virtual Memory (without swap file)
+- Shared Memory
+- Message Passing
+- Round Robin task scheduling
+- Task Local Storage (only with syscalls)
+- Multitasking and multithreading
+- Task Signal Handling
+- Modular IRQ Handling
+
+Supported Platformrs
+--------------------
+
+- `x86` - IBM PC compatible 32-bit machine (at least i486 DX).
+
+C Standard Library Implementation
+---------------------------------
+
+Current C standard version: ANSI
+
+Fully implemented headers:
+- `sting.h` - `str*` and `mem*` functions
+- `ctype.h` - `is*` functions
+- `iso646.h` - operator macros
+- `stddef.h` - standard typedefs and constants
+- `setjmp.h` - setjmp and longjmp functions
+- `limits.h` - standard limit constants
+- `signal.h` - standard signalling functions
+- `errno.h` - threadsafe errno variable
+- `assert.h` - standard assertions
+
+Partially implemented headers:
+- `stdlib.h` - most standard functions
+
+Not implemented headers:
+- `locale.h` - locale functions and constants
+- `stdio.h` - IO functions, types and macros
+- `math.h` - math functions and constants
+- `float.h` - float constants
+- `stdarg.h` - types and macros for variadic functions
+- `time.h` - timing functions and structs
+
+Non Standard Library
+--------------------
+
+- `sys/types.h` - kernel typedefs
+- `sys/limits.h` - kernel limit constants
+- `sys/syscall.h` - syscall function and constants
+- `sys/memory.h` - memory syscall flags
+- `sys/dsp.h` - DSP structs and constants
+- `sys/elf.h` - ELF structs and constants
+- `drv/uart.h` - UART driver API structs and macros
+- `simplex.h` - syscall macros (`sys_*`)
+
+POSIX Standard implementation
+-----------------------------
+
+Currently POSIX is not supported.
+
 Drived Streaming Protocol
 -------------------------
 
