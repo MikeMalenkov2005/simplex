@@ -9,7 +9,7 @@ static void K_ClearShareInfo(volatile K_ShareInfo *info)
   K_Task *target = K_GetMainTask(info->Target);
   K_Task *current = K_GetCurrentTask();
   K_HANDLE mirror = info->Mirror;
-  K_USIZE offset, size = info->Size;
+  K_USIZE offset, size = info->Size + ((K_USIZE)mirror & K_PAGE_FLAGS_MASK);
 
   if (target && target->PageMap != current->PageMap)
   {
@@ -33,8 +33,9 @@ static K_HANDLE K_ApplyShareInfo(volatile K_ShareInfo *info)
 {
   K_Task *target = K_GetMainTask(info->Target);
   K_Task *current = K_GetCurrentTask();
-  K_HANDLE mirror = NULL;
-  K_USIZE offset, page, size = info->Size;
+  K_HANDLE mirror = NULL, source = info->Source;
+  K_USIZE shift = ((K_USIZE)source & K_PAGE_FLAGS_MASK);
+  K_USIZE offset, page, size = info->Size + shift;
 
   if (target && target->PageMap != current->PageMap)
   {
@@ -43,7 +44,7 @@ static K_HANDLE K_ApplyShareInfo(volatile K_ShareInfo *info)
     if (info) for (offset = 0; offset < size; offset += K_PAGE_SIZE)
     {
       K_SetPageMap(current->PageMap);
-      page = K_GetPage(info->Source + offset);
+      page = K_GetPage(source + offset);
       K_SetPageMap(target->PageMap);
       (void)K_SetPage(mirror + offset, page | K_PAGE_EXTERNAL);
     }
@@ -51,11 +52,12 @@ static K_HANDLE K_ApplyShareInfo(volatile K_ShareInfo *info)
   }
   if (!(info->Mirror = mirror))
   {
-    if (target && target->PageMap != current->PageMap) mirror = info->Source;
+    if (target && target->PageMap != current->PageMap) mirror = source;
     info->Source = NULL;
     info->Target = 0;
     info->Size = 0;
   }
+  else info->Mirror = mirror += shift;
   return mirror;
 }
 
