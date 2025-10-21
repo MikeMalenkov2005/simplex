@@ -20,5 +20,7 @@ int strncmp(const char *s1, const char *s2, size_t n);
 void *memchr(void *s, int c, size_t n);
 char *strchr(char *s, int c);
 
+size_t strlen(const char *s);
+
 #endif
 

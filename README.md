@@ -33,7 +33,6 @@ C Standard Library Implementation
 Current C standard version: ANSI
 
 Fully implemented headers:
-- `sting.h` - `str*` and `mem*` functions
 - `ctype.h` - `is*` functions
 - `iso646.h` - operator macros
 - `stddef.h` - standard typedefs and constants
@@ -46,6 +45,7 @@ Fully implemented headers:
 - `float.h` - float constants
 
 Partially implemented headers:
+- `sting.h` - `str*` and `mem*` functions
 - `stdlib.h` - most standard functions
 
 Not implemented headers:
