@@ -43,6 +43,7 @@ Fully implemented headers:
 - `errno.h` - threadsafe errno variable
 - `assert.h` - standard assertions
 - `stdarg.h` - macros for builtins
+- `float.h` - float constants
 
 Partially implemented headers:
 - `stdlib.h` - most standard functions
@@ -51,7 +52,6 @@ Not implemented headers:
 - `locale.h` - locale functions and constants
 - `stdio.h` - IO functions, types and macros
 - `math.h` - math functions and constants
-- `float.h` - float constants
 - `time.h` - timing functions and structs
 
 Non Standard Library
