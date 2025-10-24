@@ -100,6 +100,7 @@ K_U16 K_GetRangeFlags(K_HANDLE address, K_USIZE size)
 {
   K_USIZE offset;
   K_U16 flags = (K_GetPage(address) & K_PAGE_FLAGS_MASK) | K_PAGE_VALID;
+  if (size) size += (K_USIZE)address & K_PAGE_FLAGS_MASK;
   for (offset = K_PAGE_SIZE; offset < size; offset += K_PAGE_SIZE)
   {
     if (K_IsPageTable(address + offset)) return 0;
@@ -111,6 +112,7 @@ K_U16 K_GetRangeFlags(K_HANDLE address, K_USIZE size)
 K_BOOL K_AllocatePages(K_HANDLE address, K_USIZE size, K_U16 flags)
 {
   K_USIZE offset;
+  if (size) size += (K_USIZE)address & K_PAGE_FLAGS_MASK;
   for (offset = 0; offset < size; offset += K_PAGE_SIZE)
   {
     if (!K_AllocatePage(address + offset, flags))
@@ -130,6 +132,7 @@ K_BOOL K_FreePages(K_HANDLE address, K_USIZE size)
 {
   K_USIZE offset;
   if (!K_GetRangeFlags(address, size)) return FALSE;
+  if (size) size += (K_USIZE)address & K_PAGE_FLAGS_MASK;
   for (offset = 0; offset < size; offset += K_PAGE_SIZE)
   {
     (void)K_FreePage(address + offset);
@@ -143,6 +146,7 @@ K_BOOL K_ChangePages(K_HANDLE address, K_USIZE size, K_U16 flags)
   K_U16 old = K_GetRangeFlags(address, size);
   if (!old) return FALSE;
   if (old == (flags | K_PAGE_VALID)) return TRUE;
+  if (size) size += (K_USIZE)address & K_PAGE_FLAGS_MASK;
   for (offset = 0; offset < size; offset += K_PAGE_SIZE)
   {
     if (!K_ChangePage(address + offset, flags))
@@ -163,7 +167,8 @@ K_BOOL K_IsUserRange(K_HANDLE address, K_USIZE size, K_U16 filter)
   K_USIZE offset;
   K_BOOL result = TRUE;
   K_U16 flags;
-  if (!(size = K_PageUp(size))) result = FALSE;
+  if (!size) result = FALSE;
+  else size += (K_USIZE)address & K_PAGE_FLAGS_MASK;
   for (offset = 0; result && offset < size; offset += K_PAGE_SIZE)
   {
     flags = K_GetPage(address + offset);

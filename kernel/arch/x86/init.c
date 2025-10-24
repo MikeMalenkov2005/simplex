@@ -21,13 +21,16 @@ extern void K_DebugHex(K_U16 x, K_U16 y, K_U32 value);
 extern void K_Debug(K_U16 x, K_U16 y, const char *string);
 extern void K_Panic(const char *message);
 
-static K_U32 failed = 0;
+K_BOOL K_IsBootInfoPage(K_USIZE page, const K_BootInfo *info)
+{
+  return page >= K_PageDown(info) && page < K_PageUp((K_USIZE)info + info->Size);
+}
 
-K_BOOL K_IsPageFree(K_USIZE page, K_BootInfo *info)
+K_BOOL K_IsPageFree(K_USIZE page, const K_BootInfo *info)
 {
   K_BootTag *tag;
   page = K_PageDown(page);
-  if (page >= K_PageDown(info) && page < K_PageUp((K_USIZE)info + info->Size)) return FALSE;
+  if (K_IsBootInfoPage(page, info)) return FALSE;
   K_BootForEach(info, tag) if (tag->Type == K_BOOT_TAG_MODULE)
   {
     if (page >= ((K_BootTagModule*)tag)->Start && page < ((K_BootTagModule*)tag)->End) return FALSE;
@@ -48,7 +51,7 @@ K_BOOL K_MapInfo(volatile K_BootInfo *info)
   return TRUE;
 }
 
-K_HANDLE K_MapModule(const K_BootTagModule *mod)
+K_HANDLE K_MapModule(const K_BootTagModule *mod, const K_BootInfo *info)
 {
   K_HANDLE result = K_FindLastFreeAddress(mod->End - mod->Start);
   K_USIZE size = mod->End - mod->Start;
@@ -60,12 +63,29 @@ K_HANDLE K_MapModule(const K_BootTagModule *mod)
       size = offset;
       for (offset = 0; offset < size; offset += K_PAGE_SIZE)
       {
-        (void)K_FreePage(result + offset);
+        if (K_IsBootInfoPage(mod->Start + offset, info))
+        {
+          (void)K_SetPage(result + offset, 0);
+        }
+        else (void)K_FreePage(result + offset);
       }
       result = NULL;
     }
   }
   return result;
+}
+
+void K_FreeModule(K_HANDLE address, const K_BootTagModule *mod, const K_BootInfo *info)
+{
+  K_USIZE offset, size = mod->End - mod->Start;
+  for (offset = 0; offset < size; offset += K_PAGE_SIZE)
+  {
+    if (K_IsBootInfoPage(mod->Start + offset, info))
+    {
+      (void)K_SetPage(address + offset, 0);
+    }
+    else (void)K_FreePage(address + offset);
+  }
 }
 
 void K_ArchInit(K_BootInfo *info, ISR_Frame *frame)
@@ -115,7 +135,7 @@ void K_ArchInit(K_BootInfo *info, ISR_Frame *frame)
   TASK_SetFrame(frame);
   idle = K_CreateTask(0, K_TASK_MODULE);
   address = K_FindFirstFreeAddress(K_IdleSize);
-  if (!address || !K_AllocatePage(address, K_PAGE_READABLE | K_PAGE_EXECUTABLE | K_PAGE_USER_MODE)) K_Panic("no idle!");
+  if (!address || !K_AllocatePages(address, K_IdleSize, K_PAGE_READABLE | K_PAGE_EXECUTABLE | K_PAGE_USER_MODE)) K_Panic("no idle!");
   K_SetTaskIP(idle, memcpy(address, &K_Idle, K_IdleSize));
 
   K_BootForEach(info, tag) if (tag->Type == K_BOOT_TAG_MODULE)
@@ -125,16 +145,16 @@ void K_ArchInit(K_BootInfo *info, ISR_Frame *frame)
     if (module)
     {
       K_SetPageMap(module->PageMap);
-      address = K_MapModule(mod);
+      address = K_MapModule(mod, info);
       if (!address || !K_LoadTaskImage(address, mod->End - mod->Start, &entry))
       {
-        K_DebugHex(0, failed++, mod->Start);
+        if (address) K_FreeModule(address, mod, info);
         K_SetPageMap(idle->PageMap);
         K_DeleteTask(module);
       }
       else
       {
-        K_FreePages(address, mod->End - mod->Start);
+        K_FreeModule(address, mod, info);
         K_SetPageMap(idle->PageMap);
         K_SetTaskIP(module, entry);
         K_SetTaskR0(module, (K_USIZE)mod->String);
