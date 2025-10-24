@@ -6,7 +6,7 @@
 struct UART_Buffer
 {
   K_S16 Head, Tail;
-  K_U8 Buffer[128];
+  K_U8 Buffer[0x1000];
 };
 
 typedef struct UART_Buffer UART_Buffer;
@@ -22,14 +22,14 @@ K_BOOL UART_BufferPush(UART_Buffer *buffer, K_U8 byte, K_BOOL force)
   if (buffer->Head >= 0)
   {
     buffer->Buffer[buffer->Head++] = byte;
-    buffer->Head &= 127;
+    buffer->Head &= 0xFFF;
     if (buffer->Head == buffer->Tail) buffer->Head = -1;
     return TRUE;
   }
   if (force)
   {
     buffer->Buffer[buffer->Tail++] = byte;
-    buffer->Tail &= 127;
+    buffer->Tail &= 0xFFF;
     return TRUE;
   }
   return FALSE;
@@ -40,7 +40,7 @@ K_BOOL UART_BufferPull(UART_Buffer *buffer, K_U8 *byte)
   if (buffer->Tail == buffer->Head) return FALSE;
   if (buffer->Head < 0) buffer->Head = buffer->Tail;
   *byte = buffer->Buffer[buffer->Tail++];
-  buffer->Tail &= 127;
+  buffer->Tail &= 0xFFF;
   return TRUE;
 }
 
@@ -51,7 +51,7 @@ void UART_Reply(UART_Packet *packet, K_U8 length, int tid)
 {
   packet->Header.Action = DSP_REPLY;
   packet->Header.Length = length;
-  (void)sys_send(&packet, tid);
+  (void)sys_send(packet, tid);
 }
 
 void UART_Main(const char *args)
@@ -63,13 +63,12 @@ void UART_Main(const char *args)
 
   UART_BufferClear(&RxBuffer);
   UART_BufferClear(&TxBuffer);
-  UART_Config(9600, 3);
+  UART_Config(115200, 3);
   while (*args) UART_BufferPush(&TxBuffer, *args++, FALSE);
 
   for (tid = -1; tid; tid = sys_poll(&packet, -1))
   {
     while (UART_LineState() & 1) (void)UART_BufferPush(&RxBuffer, UART_RxByte(), TRUE);
-    while ((UART_LineState() & 0x20) && UART_BufferPull(&TxBuffer, &byte)) UART_TxByte(byte);
     if (tid != -1) switch(packet.Header.Action) /* The most simple implementation */
     {
     case UART_CFG:
@@ -90,6 +89,7 @@ void UART_Main(const char *args)
       UART_Reply(&packet, DSP_FAILURE, tid);
       break;
     }
+    while ((UART_LineState() & 0x20) && UART_BufferPull(&TxBuffer, &byte)) UART_TxByte(byte);
   }
 }
 
