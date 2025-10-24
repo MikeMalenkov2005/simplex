@@ -151,6 +151,7 @@ K_BOOL K_SwitchTask()
       switch (K_TaskSlots[K_CurrentSlot].Mode)
       {
       case K_TASK_MODE_WAIT_MESSAGE:
+        message.SenderID = *(volatile K_U32*)K_TaskSlots[K_CurrentSlot].WaitInfo;
         if (K_PollMessage(K_TaskSlots[K_CurrentSlot].pMessageQueue, &message))
         {
           *(K_MessagePayload*)K_TaskSlots[K_CurrentSlot].WaitInfo = message.Payload;
@@ -198,13 +199,15 @@ K_BOOL K_SendMessage(K_Task *target, K_Message *message)
   return result;
 }
 
-K_BOOL K_WaitMessage(K_MessagePayload *buffer)
+K_BOOL K_WaitMessage(K_MessagePayload *buffer, K_U32 sender)
 {
   K_Task *task = K_GetCurrentTask();
-  K_Message message;
+  K_Message message = { 0 };
+  message.SenderID = sender;
   if (!task) return FALSE;
   if (!K_PollMessage(task->pMessageQueue, &message))
   {
+    *(volatile K_U32*)buffer = sender;
     if (!K_SwitchTask()) return FALSE;
     task->WaitInfo = buffer;
     task->Mode = K_TASK_MODE_WAIT_MESSAGE;

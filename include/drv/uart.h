@@ -38,6 +38,7 @@ union UART_Packet
 typedef union UART_Packet UART_Packet;
 
 #define UART_Send(packet) sys_send(packet, 1)
+#define UART_Wait(packet) sys_wait(packet, 1)
 
 #endif
 

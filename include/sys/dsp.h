@@ -14,6 +14,8 @@
 
 #define DSP_USER  128 /* Start of a user defined range  */
 
+#define DSP_PAYLOAD_SIZE  (K_MESSAGE_SIZE - 4)
+
 struct DSP_Header
 {
   K_U16 Stream; /* The Stream/Device ID */
@@ -26,7 +28,7 @@ typedef struct DSP_Header DSP_Header;
 struct DSP_Data
 {
   DSP_Header Header;
-  K_U8 Payload[K_MESSAGE_SIZE - 4];
+  K_U8 Payload[DSP_PAYLOAD_SIZE];
 };
 
 typedef struct DSP_Data DSP_Data;

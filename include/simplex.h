@@ -17,9 +17,9 @@ long __syscall(long number, long arg1, long arg2, long arg3);
 #define sys_exit(status) syscall(SYS_EXIT, status)
 
 #define sys_send(msg, tid) syscall(SYS_SEND, (unsigned long)(msg), tid)
-#define sys_poll(msg) syscall(SYS_POLL, (unsigned long)(msg))
-#define sys_wait(msg) syscall(SYS_WAIT, (unsigned long)(msg))
-#define sys_peek(msg) syscall(SYS_PEEK, (unsigned long)(msg))
+#define sys_poll(msg, tid) syscall(SYS_POLL, (unsigned long)(msg), tid)
+#define sys_wait(msg, tid) syscall(SYS_WAIT, (unsigned long)(msg), tid)
+#define sys_peek(msg, tid) syscall(SYS_PEEK, (unsigned long)(msg), tid)
 
 #define sys_gettid() (int)syscall(SYS_GET_TASK_ID)
 #define sys_getgid() (int)syscall(SYS_GET_GROUP_ID)

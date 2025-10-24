@@ -3,10 +3,10 @@
 
 #define SYS_EXIT  0 /* Exit Task (status *UNUSED FOR NOW*)  */
 
-#define SYS_SEND  1 /* Send Message (payload[K_MESSAGE_SIZE], target) */
-#define SYS_POLL  2 /* Poll Message (buffer[K_MESSAGE_SIZE]) -> tid   */
-#define SYS_WAIT  3 /* Wait Message (buffer[K_MESSAGE_SIZE]) -> tid   */
-#define SYS_PEEK  4 /* Peek Message (buffer[K_MESSAGE_SIZE]) -> tid   */
+#define SYS_SEND  1 /* Send Message (payload[K_MESSAGE_SIZE], target)     */
+#define SYS_POLL  2 /* Poll Message (buffer[K_MESSAGE_SIZE], tid) -> tid  */
+#define SYS_WAIT  3 /* Wait Message (buffer[K_MESSAGE_SIZE], tid) -> tid  */
+#define SYS_PEEK  4 /* Peek Message (buffer[K_MESSAGE_SIZE], tid) -> tid  */
 
 #define SYS_GET_TASK_ID   5   /* Get Task ID                            */
 #define SYS_GET_GROUP_ID  6   /* Get Task Group ID                      */

@@ -66,7 +66,7 @@ void UART_Main(const char *args)
   UART_Config(9600, 3);
   while (*args) UART_BufferPush(&TxBuffer, *args++, FALSE);
 
-  for (tid = -1; tid; tid = sys_poll(&packet))
+  for (tid = -1; tid; tid = sys_poll(&packet, -1))
   {
     while (UART_LineState() & 1) (void)UART_BufferPush(&RxBuffer, UART_RxByte(), TRUE);
     while ((UART_LineState() & 0x20) && UART_BufferPull(&TxBuffer, &byte)) UART_TxByte(byte);

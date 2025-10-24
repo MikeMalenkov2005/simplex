@@ -16,7 +16,7 @@ int main()
   packet.Data.Payload[7] = '\r';
   packet.Data.Payload[8] = '\n';
   UART_Send(&packet);
-  if (sys_wait(&packet) == 1)
+  if (UART_Wait(&packet) != -1)
   {
   }
   for (;;);

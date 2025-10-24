@@ -51,7 +51,7 @@ K_BOOL K_SwitchTask();
 K_BOOL K_WaitTicks(K_U32 duration);
 
 K_BOOL K_SendMessage(K_Task *target, K_Message *message);
-K_BOOL K_WaitMessage(K_MessagePayload *buffer);
+K_BOOL K_WaitMessage(K_MessagePayload *buffer, K_U32 sender);
 
 K_BOOL K_WaitTaskIRQ(K_USIZE irq);
 K_BOOL K_BeginTaskIRQ(K_USIZE irq);
