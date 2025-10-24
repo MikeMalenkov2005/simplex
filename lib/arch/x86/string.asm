@@ -50,6 +50,8 @@ memmove:
   std
   add esi, ecx
   add edi, ecx
+  dec esi
+  dec edi
 .execute:
   rep movsb
   mov eax, edx
