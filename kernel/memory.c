@@ -1,4 +1,5 @@
 #include "memory.h"
+#include "utils.h"
 
 extern void __end;
 
@@ -14,6 +15,7 @@ K_BOOL K_AllocatePage(K_HANDLE address, K_U16 flags)
   (void)K_SetPage(address, K_FirstFreePage | (flags & K_PAGE_FLAGS_MASK) | K_PAGE_VALID);
   K_FirstFreePage = *(K_USIZE*)address;
   --K_FreePageCount;
+  K_ZeroMemory(address, K_PAGE_SIZE);
   return TRUE;
 }
 
