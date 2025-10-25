@@ -54,7 +54,7 @@ void UART_Reply(UART_Packet *packet, K_U8 length, int tid)
   (void)sys_send(packet, tid);
 }
 
-void UART_Main(const char *args)
+int main(const char *args)
 {
   UART_Packet packet;
   K_U32 index;
@@ -91,5 +91,6 @@ void UART_Main(const char *args)
     }
     while ((UART_LineState() & 0x20) && UART_BufferPull(&TxBuffer, &byte)) UART_TxByte(byte);
   }
+  return 0;
 }
 

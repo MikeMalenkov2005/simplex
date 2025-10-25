@@ -1,5 +1,5 @@
 #include "../../uart.h"
-#include "pio.h"
+#include <x86/pio.h>
 
 #define COM1  0x3F8
 #define COM2  0x2F8
@@ -22,26 +22,26 @@
 void UART_Config(K_U32 baud, K_U8 lcr)
 {
   K_U32 divisor = baud ? 115200 / baud : 1;
-  PIO_Write(COM1 + LCR, lcr | 0x80);
-  PIO_Write(COM1 + DLL, (K_U8)divisor);
-  PIO_Write(COM1 + DLH, (K_U8)(divisor >> 8));
-  PIO_Write(COM1 + LCR, lcr & 0x7F);
-  PIO_Write(COM1 + IER, 0);
-  PIO_Write(COM1 + FCR, 7);
+  PIO_Write8(COM1 + LCR, lcr | 0x80);
+  PIO_Write8(COM1 + DLL, (K_U8)divisor);
+  PIO_Write8(COM1 + DLH, (K_U8)(divisor >> 8));
+  PIO_Write8(COM1 + LCR, lcr & 0x7F);
+  PIO_Write8(COM1 + IER, 0);
+  PIO_Write8(COM1 + FCR, 7);
 }
 
 K_U8 UART_LineState()
 {
-  return PIO_Read(COM1 + LSR);
+  return PIO_Read8(COM1 + LSR);
 }
 
 void UART_TxByte(K_U8 byte)
 {
-  PIO_Write(COM1 + THR, byte);
+  PIO_Write8(COM1 + THR, byte);
 }
 
 K_U8 UART_RxByte()
 {
-  return PIO_Read(COM1 + RBR);
+  return PIO_Read8(COM1 + RBR);
 }
 
