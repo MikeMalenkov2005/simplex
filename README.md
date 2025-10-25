@@ -57,6 +57,7 @@ Not implemented headers:
 Non Standard Library
 --------------------
 
+General:
 - `sys/types.h` - kernel typedefs
 - `sys/limits.h` - kernel limit constants
 - `sys/syscall.h` - syscall function and constants
@@ -65,6 +66,9 @@ Non Standard Library
 - `sys/elf.h` - ELF structs and constants
 - `drv/uart.h` - UART driver API structs and macros
 - `simplex.h` - syscall macros (`sys_*`)
+
+Only for x86:
+- `x86/pio.h` - x86 port I/O operations (for drivers only)
 
 POSIX Standard implementation
 -----------------------------

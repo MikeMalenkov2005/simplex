@@ -12,8 +12,10 @@ extern raise
 section .text
 
 _start:
+  push eax
   call __crt_init
   call main
+  push eax
   call exit
 
 __crt_signal_handler:
