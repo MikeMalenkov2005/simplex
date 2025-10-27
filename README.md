@@ -47,12 +47,12 @@ Fully implemented headers:
 Partially implemented headers:
 - `sting.h` - `str*` and `mem*` functions
 - `stdlib.h` - most standard functions
+- `time.h` - timing functions and structs
 
 Not implemented headers:
 - `locale.h` - locale functions and constants
 - `stdio.h` - IO functions, types and macros
 - `math.h` - math functions and constants
-- `time.h` - timing functions and structs
 
 Non Standard Library
 --------------------
@@ -69,6 +69,8 @@ General:
 
 Only for x86:
 - `x86/pio.h` - x86 port I/O operations (for drivers only)
+- `drv/x86ps2.h` - x86 PS/2 driver structs and macros
+- `drv/x86vga.h` - x86 VGA driver structs and macros
 
 POSIX Standard implementation
 -----------------------------

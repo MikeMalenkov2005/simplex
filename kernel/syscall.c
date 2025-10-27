@@ -1,5 +1,6 @@
 #include "syscall.h"
 #include "share.h"
+#include "timer.h"
 
 #define __CRT_MAP_FLAGS
 
@@ -180,6 +181,12 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     K_SetTaskR0(task, (K_USIZE)task->Handler);
     task->Handler = (K_HANDLE)arg1;
     break;
+  case SYS_GET_TIME:
+    K_SetTaskR0(task, K_GetRealTime());
+    break;
+  case SYS_SET_TIME:
+    if (K_SetRealTime((K_SSIZE)arg1)) K_SetTaskR0(task, 0);
+    break;
   case SYS_TLS_NEW:
     K_SetTaskR0(task, K_TLSNewEntry(task->pTLS));
     break;
@@ -191,6 +198,9 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     break;
   case SYS_GROUP_EXIT:
     (void)K_DeleteTask(K_GetMainTask(task->GroupID));
+    break;
+  case SYS_GET_TICKS:
+    K_SetTaskR0(task, (K_SSIZE)(K_S32)K_Ticks);
     break;
   case SYS_MAP:
     if (!arg1)

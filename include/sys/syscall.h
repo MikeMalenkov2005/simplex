@@ -19,11 +19,16 @@
 #define SYS_SIGNAL_TASK   11  /* Interrupt a Task (tid, value to stack) */
 #define SYS_SET_HANDLER   12  /* Set a Signal Handler (func)            */
 
+#define SYS_GET_TIME      13  /* Get the current time as time_t         */
+#define SYS_SET_TIME      14  /* Set the current time (time_t)          */
+
 #define SYS_TLS_NEW       15  /* Create a new TLS entry () -> slot      */
 #define SYS_TLS_GET       16  /* Get a TLS entry value (slot) -> value  */
 #define SYS_TLS_SET       17  /* Set a TLS entry value (slot, value)    */
 
 #define SYS_GROUP_EXIT    18  /* Exit the Task Group (status)           */
+
+#define SYS_GET_TICKS     19  /* Get the number of ticks since boot     */
 
 #define SYS_MAP   20 /* Map Memory/Device (Address(for device), Size, Flags)  */
 #define SYS_FREE  21 /* Free Memory/Device (VirtualAddress, Size)             */

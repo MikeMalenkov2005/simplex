@@ -11,6 +11,8 @@
 
 extern void __crt_signal_handler(void);
 
+extern unsigned long __crt_start_ticks;
+
 static long __crt_info_tls;
 
 static void *__crt_brk_base;
@@ -24,6 +26,7 @@ void __crt_init(void)
   if ((__crt_info_tls = sys_tls_new()) == -1) abort();
   if (!(__crt_brk_base = sys_map(NULL, K_PAGE_SIZE, MAP_RD | MAP_WR | MAP_UP))) abort();
   __crt_brk_limit = (__crt_brk_value = __crt_brk_base) + K_PAGE_SIZE;
+  __crt_start_ticks = sys_get_ticks();
 }
 
 void __crt_lock(int *lock)
