@@ -32,7 +32,7 @@ time_t time(time_t *timer);
 
 char *asctime(const struct tm *timeptr);
 
-char *ctype(const time_t *timer); /* same as asctime(localtime(timer)) */
+char *ctime(const time_t *timer); /* same as asctime(localtime(timer)) */
 
 struct tm *gmtime(const time_t *timer);
 

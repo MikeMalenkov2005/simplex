@@ -10,6 +10,8 @@
 #include "task.h"
 #include "tls.h"
 
+K_SSIZE K_LocalTimeZone;
+
 K_BOOL K_CallSendMessage(K_MessagePayload *payload, K_Task *target)
 {
   K_Message message;
@@ -226,6 +228,13 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
       K_SetTaskR0(task, (K_USIZE)K_ShareMemory(arg3, (K_HANDLE)arg1, arg2));
     }
     else K_SetTaskR0(task, 0);
+    break;
+  case SYS_GET_TIME_ZONE:
+    K_SetTaskR0(task, K_LocalTimeZone);
+    break;
+  case SYS_SET_TIME_ZONE:
+    K_SetTaskR0(task, K_LocalTimeZone);
+    K_LocalTimeZone = (K_SSIZE)arg1;
     break;
   case SYS_IRQ_WAIT:
     K_SetTaskR0(task, 0);

@@ -49,6 +49,9 @@ long __syscall(long number, long arg1, long arg2, long arg3);
 #define sys_share(address, size, tid) ((void*)(unsigned long)syscall(SYS_SHARE, (unsigned long)(address), size, tid))
 #define sys_unshare(address, tid) (!!sys_share(address, 0, tid))
 
+#define sys_get_zone() syscall(SYS_GET_TIME_ZONE)
+#define sys_set_zone(seconds) syscall(SYS_SET_TIME_ZONE, seconds)
+
 #define sys_irq_wait(irq) syscall(SYS_IRQ_WAIT, irq)
 #define sys_irq_exit() syscall(SYS_IRQ_EXIT)
 

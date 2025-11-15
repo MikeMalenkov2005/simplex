@@ -35,6 +35,9 @@
 #define SYS_REMAP 22 /* ReMap Memory/Device (VirtualAddress, Size, Flags)     */
 #define SYS_SHARE 23 /* Share Memory/Device (VirtualAddress, Size, TaskID)    */
 
+#define SYS_GET_TIME_ZONE 24  /* Get the local time zone () -> seconds        */
+#define SYS_SET_TIME_ZONE 25  /* Set the local time zone (seconds) -> prev    */
+
 #define SYS_IRQ_WAIT  30 /* Wait For IRQ (irq)  */
 #define SYS_IRQ_EXIT  31 /* Exit IRQ Loop       */
 

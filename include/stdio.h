@@ -2,6 +2,7 @@
 #define _STDIO_H
 
 #include <stddef.h>
+#include <stdarg.h>
 
 typedef struct FILE FILE;
 
@@ -57,9 +58,17 @@ int scanf(FILE *stream, const char *format, ...);
 
 int snprintf(char *s, size_t n, const char *format, ...);
 int sprintf(char *s, const char *format, ...);
-int sscanf(char *s, const char *format, ...);
+int sscanf(const char *s, const char *format, ...);
 
-/* vfprintf */
+int vfprintf(FILE *stream, const char *format, va_list arg);
+int vfscanf(FILE *stream, const char *format, va_list arg);
+
+int vprintf(const char *format, va_list arg);
+int vscanf(const char *format, va_list arg);
+
+int vsnprintf(char *s, size_t n, const char *format, va_list arg);
+int vsprintf(char *s, const char *format, va_list arg);
+int vsscanf(const char *s, const char *format, va_list arg);
 
 #endif
 

@@ -14,21 +14,23 @@
 #define BIN2BCD(bin)  \
   ((((bin) / 10) << 4) | ((bin) % 10))
 
-/* TODO: Find a way to configure default century */
+/* TODO: Find a way to configure default century. Or not? */
 K_U8 K_DefaultCentury = 20;
 K_U8 CMOS_CenturyOffset = 0;
+
+extern K_SSIZE K_LocalTimeZone;
 
 K_SSIZE K_GetRealTime()
 {
   int seconds, minutes, hours;
   int day, month, year, century = K_DefaultCentury;
   int leaps, leap, nmi = K_ReadPort8(0x70) & 0x80;
-  int bcd = CMOS_Read(nmi | 0x0B) & 4;
+  int status = ~CMOS_Read(nmi | 0x0B);
 
   if (CMOS_CenturyOffset)
   {
     century = CMOS_Read(nmi | CMOS_CenturyOffset);
-    if (bcd) century = BCD2BIN(century);
+    if (status & 4) century = BCD2BIN(century);
   }
   
   year = CMOS_Read(nmi | 0x09);
@@ -38,19 +40,22 @@ K_SSIZE K_GetRealTime()
   minutes = CMOS_Read(nmi | 0x02);
   seconds = CMOS_Read(nmi | 0x00);
 
-  if (bcd)
+  if (status & 4)
   {
     year = BCD2BIN(year);
     month = BCD2BIN(month);
     day = BCD2BIN(day);
-    if (hours & 0x80)
+    if (status & 2)
     {
-      hours &= 0x7F;
-      hours = BCD2BIN(hours) + 12;
+      hours = BCD2BIN(hours & 0x7F) + (hours & 0x80 ? 11 : -1);
     }
     else hours = BCD2BIN(hours);
     minutes = BCD2BIN(minutes);
     seconds = BCD2BIN(seconds);
+  }
+  else if (status & 2)
+  {
+    hours = (hours & 0x7F) + (hours & 0x80 ? 11 : -1);
   }
 
   year += century * 100;
@@ -71,7 +76,7 @@ K_SSIZE K_GetRealTime()
   if (hours & 0x80) hours = (hours & 0x7F) + 12;
   
   return ((K_SSIZE)(year - EPOCH_YEAR) * 365 + day - 1 + leaps) * 86400
-    + hours * 3600 + minutes * 60 + seconds;
+    + hours * 3600 + minutes * 60 + seconds - K_LocalTimeZone;
 }
 
 K_BOOL K_SetRealTime(K_SSIZE value)
@@ -79,13 +84,14 @@ K_BOOL K_SetRealTime(K_SSIZE value)
   int day, month, year, century, check, leap, nmi = K_ReadPort8(0x70);
   int week_day, hours, minutes, seconds, status = CMOS_Read(nmi | 0x0B);
 
-  if ((seconds = value % 60) < 0) seconds = 60 - seconds;
+  value += K_LocalTimeZone;
+  if ((seconds = value % 60) < 0) seconds += 60;
   value /= 60;
-  if ((minutes = value % 60) < 0) minutes = 60 - minutes;
+  if ((minutes = value % 60) < 0) minutes += 60;
   value /= 60;
-  if ((hours = value % 24) < 0) hours = 24 - hours;
+  if ((hours = value % 24) < 0) hours += 24;
   value /= 24;
-  if ((week_day = (value + 4) % 7 + 1) < 0) week_day = 7 - week_day;
+  if ((week_day = (value + 4) % 7 + 1) <= 0) week_day += 7;
 
   year = EPOCH_YEAR;
   check = EPOCH_YEAR % 400;
@@ -94,14 +100,14 @@ K_BOOL K_SetRealTime(K_SSIZE value)
   {
     value -= 365 + leap;
     if (++check) check = 0;
-    leap = !(value & 3) && value != 100 && value != 200 && value != 300;
+    leap = !(check & 3) && check != 100 && check != 200 && check != 300;
     ++year;
   }
   while (value < 0)
   {
     value += 365 + leap;
     if (check--) check = 399;
-    leap = !(value & 3) && value != 100 && value != 200 && value != 300;
+    leap = !(check & 3) && check != 100 && check != 200 && check != 300;
     --year;
   }
   if (year < 0) return FALSE;
@@ -122,19 +128,24 @@ K_BOOL K_SetRealTime(K_SSIZE value)
   century = year / 100;
   year %= 100;
 
-  if (status & 2)
+  if (status & 4)
   {
     year = BIN2BCD(year);
     month = BIN2BCD(month);
     day = BIN2BCD(day);
-    if (status & 4)
+    if (status & 2)
     {
-      hours -= 12;
-      hours = BIN2BCD(hours) | 0x80;
+      if (hours < 12) hours = BIN2BCD(hours + 1);
+      else hours = BIN2BCD(hours - 11) | 0x80;
     }
     else hours = BIN2BCD(hours);
     minutes = BIN2BCD(minutes);
     seconds = BIN2BCD(seconds);
+  }
+  else if (status & 2)
+  {
+    if (hours < 12) ++hours;
+    else hours = (hours - 11) | 0x80;
   }
 
   K_DefaultCentury = century;
