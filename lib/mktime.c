@@ -97,14 +97,14 @@ struct tm *gmtime(const time_t *timer)
   while (value >= 365 + leap)
   {
     value -= 365 + leap;
-    if (++check) check = 0;
+    if (++check == 400) check = 0;
     leap = !(check & 3) && check != 100 && check != 200 && check != 300;
     ++result.tm_year;
   }
   while (value < 0)
   {
     value += 365 + leap;
-    if (check--) check = 399;
+    if (!check--) check = 399;
     leap = !(check & 3) && check != 100 && check != 200 && check != 300;
     --result.tm_year;
   }
