@@ -3,6 +3,7 @@
 #include <simplex.h>
 
 #define EPOCH_YEAR          70  /* since 1900 */
+#define EPOCH_YEAR_REAL     1970
 #define LEAPS_BEFORE_EPOCH  477
 
 int fixdst(struct tm *timeptr)
@@ -16,7 +17,7 @@ time_t mktime(struct tm *timeptr)
   if (!timeptr) return (time_t)-1;
   long days = timeptr->tm_mday - 1;
   int hour = timeptr->tm_hour - fixdst(timeptr);
-  int year = timeptr->tm_year, month = timeptr->tm_mon + 1;
+  int year = timeptr->tm_year + 1900, month = timeptr->tm_mon + 1;
   int leap = (!(year % 4) && (year % 100)) || !(year % 400);
   int leaps = (year / 4 - year / 100 + year / 400) - LEAPS_BEFORE_EPOCH - leap;
 
@@ -39,7 +40,7 @@ time_t mktime(struct tm *timeptr)
   if (month > 11) days += 30;
   
   timeptr->tm_yday = (int)days;
-  days += (time_t)(year - EPOCH_YEAR) * 365 + leaps;
+  days += (time_t)(year - EPOCH_YEAR_REAL) * 365 + leaps;
   if ((timeptr->tm_wday = (int)((days + 4) % 7)) < 0) timeptr->tm_wday += 7;
 
   return days * 86400 + hour * 3600 + timeptr->tm_min * 60
