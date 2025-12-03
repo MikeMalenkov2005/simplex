@@ -12,7 +12,7 @@ ISO_FILE = $(ROOTDIR)/$(KERNEL).iso
 
 .PHONY: clean
 
-# all: $(ROOTDIR)/$(KERNEL).img $(ROOTDIR)/$(KERNEL).iso
+all: $(ISO_FILE)
 
 $(ISO_FILE): $(KERNEL_FILE) $(MODULE_FILES) $(GRUBCFG)
 	mkdir -p $(ISO_DIR)/boot/grub
@@ -36,5 +36,5 @@ $(ISO_FILE): $(KERNEL_FILE) $(MODULE_FILES) $(GRUBCFG)
 #	grub-mkimage -p / -C auto -O i386-pc -o $@ $(GRUBMOD)
 
 clean:
-	rm -rf $(ISO_DIR) $(ROOTDIR)/$(KERNEL).img
+	rm -rf $(ISO_DIR) $(ISO_FILE) $(FLOPPY_FILE)
 
