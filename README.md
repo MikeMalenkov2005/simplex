@@ -6,8 +6,13 @@ SIMPLEX is a simplistic OS based on microkernel achitecture.
 System Modules
 --------------
 
+General:
 - `uart` is a UART driver that uses the DSP for communication.
 - `shell` is a simple command processor (shell).
+
+Only for x86:
+- `x86vga` is a simple VGA text mode driver.
+- `x86ps2` is a PS/2 keyboard driver.
 
 Kernel Features
 ---------------
@@ -43,15 +48,15 @@ Fully implemented headers:
 - `assert.h` - standard assertions
 - `stdarg.h` - macros for builtins
 - `float.h` - float constants
+- `sting.h` - `str*` and `mem*` functions
+- `time.h` - timing functions and structs
 
 Partially implemented headers:
-- `sting.h` - `str*` and `mem*` functions
 - `stdlib.h` - most standard functions
-- `time.h` - timing functions and structs
+- `stdio.h` - IO functions, types and macros
 
 Not implemented headers:
 - `locale.h` - locale functions and constants
-- `stdio.h` - IO functions, types and macros
 - `math.h` - math functions and constants
 
 Non Standard Library

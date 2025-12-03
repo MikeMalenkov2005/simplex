@@ -17,10 +17,23 @@ char *strncat(char *s1, const char *s2, size_t n);
 int strcmp(const char *s1, const char *s2);
 int strncmp(const char *s1, const char *s2, size_t n);
 
-void *memchr(void *s, int c, size_t n);
-char *strchr(char *s, int c);
+void *memchr(const void *s, int c, size_t n);
+char *strchr(const char *s, int c);
+char *strrchr(const char *s, int c);
 
 size_t strlen(const char *s);
+
+int strcoll(const char *s1, const char *s2);
+size_t strxfrm(char *s1, const char *s2, size_t n);
+
+size_t strcspn(const char *s1, const char *s2);
+size_t strspn(const char *s1, const char *s2);
+char *strpbrk(const char *s1, const char *s2);
+
+char *strstr(const char *s1, const char *s2);
+char *strtok(char *s1, const char *s2);
+
+char *strerror(int errnum);
 
 #endif
 

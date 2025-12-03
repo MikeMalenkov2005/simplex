@@ -39,6 +39,11 @@ void __crt_unlock(int *lock)
   (void)__crt_atomic_swap(lock, 0);
 }
 
+int __crt_try_lock(int *lock)
+{
+  return __crt_atomic_swap(lock, 1) ? -1 : 0;
+}
+
 static void *__crt_sbrk_internal(ptrdiff_t incr)
 {
   ptrdiff_t size;
