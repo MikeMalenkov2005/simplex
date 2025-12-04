@@ -6,7 +6,7 @@ All current goals should be listed here.
 Urgent Tasks
 ------------
 
-- fix incorrect month and day of month
+There are not urgent tasks.
 
 Short-Term Goals
 ----------------
