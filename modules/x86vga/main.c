@@ -1,11 +1,8 @@
 #include <drv/x86vga.h>
 #include <sys/memory.h>
-#include <sys/limits.h>
-#include <sys/types.h>
 #include <x86/pio.h>
 #include <simplex.h>
 #include <string.h>
-#include <time.h>
 
 static K_U16 *text_screen;
 static K_U16 text_cursor;
@@ -64,21 +61,10 @@ static void VGA_Scroll(K_U8 lines)
   else VGA_ClearScreen();
 }
 
-static void test_print(K_USIZE number)
+static void VGA_SendInfo(int tid)
 {
-  char buffer[32];
-  int i = 0;
-  while (number)
-  {
-    buffer[i++] = number % 10 + '0';
-    number /= 10;
-  }
-  if (!i) buffer[i++] = '0';
-  text_cursor += 80 - (text_cursor & 0x7FFF) % 80;
-  while (i--)
-  {
-    text_screen[text_cursor++ & 0x7FFF] = buffer[i] | (text_color << 8);
-  }
+  VGA_Info info = { 25, 80, text_cursor, text_color, 0, { 0 } };
+  (void)sys_send(&info, tid);
 }
 
 int main()
@@ -89,21 +75,6 @@ int main()
   text_screen = sys_map(0xB8000, 4000, MAP_RD | MAP_WR);
   VGA_ShowTextCursor(14, 15);
   VGA_ClearScreen();
-
-  time_t t = time(NULL);
-  char *s = ctime(&t);
-  while (*s)
-  {
-    if (*s == '\n')
-    {
-      text_cursor += 80 - (text_cursor & 0x7FFF) % 80;
-      ++s;
-    }
-    else text_screen[text_cursor++ & 0x7FFF] = *s++ | (text_color << 8);
-  }
-  test_print(t);
-  test_print(mktime(gmtime(&t)));
-  VGA_UpdateTextCursor();
   
   while ((tid = sys_wait(&message, -1))) if (tid != -1)
   {
@@ -157,6 +128,10 @@ int main()
       break;
     case VGA_SCROLL:
       if (i < K_MESSAGE_SIZE) VGA_Scroll(message[i]);
+      break;
+    case VGA_GET_INFO:
+      VGA_SendInfo(tid);
+      --i;
       break;
     }
   }
