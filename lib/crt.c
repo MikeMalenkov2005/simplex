@@ -29,17 +29,17 @@ void __crt_init(void)
   __crt_start_ticks = sys_get_ticks();
 }
 
-void __crt_lock(int *lock)
+void __crt_lock(volatile int *lock)
 {
   while (__crt_atomic_swap(lock, 1)) sys_switch();
 }
 
-void __crt_unlock(int *lock)
+void __crt_unlock(volatile int *lock)
 {
   (void)__crt_atomic_swap(lock, 0);
 }
 
-int __crt_try_lock(int *lock)
+int __crt_try_lock(volatile int *lock)
 {
   return __crt_atomic_swap(lock, 1) ? -1 : 0;
 }

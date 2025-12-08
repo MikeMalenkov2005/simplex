@@ -16,3 +16,17 @@ __crt_atomic_get_add:
   lock xadd [edx], eax
   ret
 
+__crt_atomic_compare_swap:
+  push ebx
+  mov edx, [esp + 8]
+  mov ebx, [esp + 12]
+  mov ecx, [esp + 16]
+  mov eax, [ebx]
+  lock cmpxchg [edx], ecx
+  setz cl
+  mov [ebx], eax
+  xor eax, eax
+  mov al, cl
+  pop ebx
+  ret
+
