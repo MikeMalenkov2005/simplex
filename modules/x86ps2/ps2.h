@@ -8,7 +8,7 @@
 
 typedef struct PS2_Buffer
 {
-  int head, tail, changed;
+  int head, tail;
   K_U8 data[BUFFER_SIZE];
 } PS2_Buffer;
 

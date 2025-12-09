@@ -12,60 +12,70 @@ static PS2_Queue queue;
 static volatile PS2_Command command;
 static volatile int ready;
 
-K_BOOL PS2_BufferPull(volatile PS2_Buffer *buffer, K_U8 *byte)
+K_BOOL PS2_BufferPull(PS2_Buffer *buffer, K_U8 *byte)
 {
-  int head, tail;
+  if (!buffer || buffer->head == buffer->tail) return FALSE;
+  if (byte) *byte = buffer->data[buffer->tail];
+  if (buffer->head < 0) buffer->head = buffer->tail;
+  buffer->tail = (buffer->tail + 1) & BUFFER_MASK;
+  return TRUE;
+}
+
+K_BOOL PS2_BufferPush(PS2_Buffer *buffer, K_U8 byte)
+{
   if (!buffer) return FALSE;
-  do {
-    head = buffer->head;
-    tail = buffer->tail;
-    buffer->changed = 0;
-    if (head == tail) return FALSE;
-    if (byte) *byte = buffer->data[tail];
-  } while (buffer->changed);
-  if (head < 0) buffer->head = tail;
-  buffer->tail = (tail + 1) & BUFFER_MASK;
+  if (buffer->head < 0)
+  {
+    buffer->data[buffer->tail++] = byte;
+    buffer->tail &= BUFFER_MASK;
+  }
+  else
+  {
+    buffer->data[buffer->head++] = byte;
+    if ((buffer->head &= BUFFER_MASK) == buffer->tail) buffer->head = -1;
+  }
   return TRUE;
 }
 
 void irq_handler()
 {
-  static K_U8 left = 0;
-  K_U8 byte;
+  K_U8 message[K_MESSAGE_SIZE];
+  int i, ltid = sys_getltid();
+  K_U8 byte, left = 0;
 
-  while (sys_irq_wait(1) != -1) while (PIO_Read8(0x64) & 1)
+  while (sys_irq_wait(1) != -1)
   {
-    byte = PIO_Read8(0x60);
-    if (left)
+    i = 1;
+    while (PIO_Read8(0x64) & 1)
     {
-      command.data[command.returns - --left] = byte;
-      if (!left) ready = command.returns + 1;
-    }
-    else if (!ready && command.sender != -1 && byte == 0xFA)
-    {
-      command.data[0] = byte;
-      ready = !(left = command.returns);
-    }
-    else if (!ready && command.sender != -1 && (byte == 0xFE || byte == 0xEE))
-    {
-      command.data[0] = byte;
-      ready = 1;
-    }
-    else if (input.head < 0)
-    {
-      input.data[input.tail++] = byte;
-      input.tail &= BUFFER_MASK;
-      input.changed = 1;
-    }
-    else
-    {
-      input.data[input.head++] = byte;
-      if ((input.head &= BUFFER_MASK) == input.tail)
+      byte = PIO_Read8(0x60);
+      if (left)
       {
-        input.head = -1;
-        input.changed = 1;
+        command.data[command.returns - --left] = byte;
+        if (!left) ready = command.returns + 1;
+      }
+      else if (!ready && command.sender != -1 && byte == 0xFA)
+      {
+        command.data[0] = byte;
+        ready = !(left = command.returns);
+      }
+      else if (!ready && command.sender != -1 && (byte == 0xFE || byte == 0xEE))
+      {
+        command.data[0] = byte;
+        ready = 1;
+      }
+      else
+      {
+        message[i++] = byte;
+        if (i == K_MESSAGE_SIZE)
+        {
+          message[0] = i;
+          sys_send(message, ltid);
+          i = 1;
+        }
       }
     }
+    if ((message[0] = i) > 1) sys_send(message, ltid);
   }
 }
 
@@ -80,14 +90,17 @@ int main()
   {
     if (tid == irq1)
     {
-      /* TODO: use messages to move input get irq handler */
+      for (i = 1; i < message[0] && i < K_MESSAGE_SIZE; ++i)
+      {
+        (void)PS2_BufferPush(&input, message[i]);
+      }
     }
-    if (tid != -1) switch (message[0])
+    else if (tid != -1) switch (message[0])
     {
     case PS2_RECEIVE:
       for (i = 1; i < K_MESSAGE_SIZE &&
           PS2_BufferPull(&input, message + i); ++i);
-      message[0] = (K_U8)i;
+      message[0] = (K_U8)(i - 1);
       (void)sys_send(message, tid);
       break;
     case PS2_COMMAND:
