@@ -9,7 +9,7 @@ void putch(int ch)
   output[0] = VGA_PUT_SYMBOL;
   output[1] = ch;
   output[2] = 0;
-  sys_send(output, 3);
+  sys_send(output, VGA_TASK_ID);
 }
 
 int getch(void)
@@ -21,9 +21,9 @@ int getch(void)
     input[0] = PS2_RECEIVE;
     input[1] = 0;
     input[2] = 0;
-    sys_send(input, 4);
+    sys_send(input, PS2_TASK_ID);
     input[0] = index = 0;
-    sys_wait(input, 4);
+    sys_wait(input, PS2_TASK_ID);
   }
   return input[++index];
 }
