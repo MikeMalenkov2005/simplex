@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 
-extern K_U32 K_Ticks;
+extern K_USIZE K_Ticks;
 
 void K_TickCallback();
 

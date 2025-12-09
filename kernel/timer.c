@@ -1,7 +1,7 @@
 #include "timer.h"
 #include "task.h"
 
-K_U32 K_Ticks;
+K_USIZE K_Ticks;
 
 void K_TickCallback()
 {

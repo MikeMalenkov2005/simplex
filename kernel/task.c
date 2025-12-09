@@ -160,7 +160,7 @@ K_BOOL K_SwitchTask()
         }
         break;
       case K_TASK_MODE_WAIT_TIME:
-        if ((K_S32)(K_U32)((K_USIZE)K_TaskSlots[K_CurrentSlot].WaitInfo - K_Ticks) <= 0)
+        if ((K_SSIZE)((K_USIZE)K_TaskSlots[K_CurrentSlot].WaitInfo - K_Ticks) <= 0)
         {
           K_TaskSlots[K_CurrentSlot].Mode = K_TASK_MODE_RUNNING;
           K_TaskSlots[K_CurrentSlot].WaitInfo = NULL;
@@ -176,11 +176,11 @@ K_BOOL K_SwitchTask()
   return switched;
 }
 
-K_BOOL K_WaitTicks(K_U32 duration)
+K_BOOL K_WaitTicks(K_USIZE duration)
 {
   K_Task *task = K_GetCurrentTask();
   if (!task || !K_SwitchTask()) return FALSE;
-  task->WaitInfo = (K_HANDLE)(K_USIZE)(K_U32)(K_Ticks + duration);
+  task->WaitInfo = (K_HANDLE)(K_Ticks + duration);
   task->Mode = K_TASK_MODE_WAIT_TIME;
   return TRUE;
 }

@@ -202,7 +202,7 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     (void)K_DeleteTask(K_GetMainTask(task->GroupID));
     break;
   case SYS_GET_TICKS:
-    K_SetTaskR0(task, (K_SSIZE)(K_S32)K_Ticks);
+    K_SetTaskR0(task, K_Ticks);
     break;
   case SYS_MAP:
     if (!arg1)

@@ -48,7 +48,7 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags);
 K_BOOL K_DeleteTask(K_Task *task);
 K_BOOL K_SwitchTask();
 
-K_BOOL K_WaitTicks(K_U32 duration);
+K_BOOL K_WaitTicks(K_USIZE duration);
 
 K_BOOL K_SendMessage(K_Task *target, K_Message *message);
 K_BOOL K_WaitMessage(K_MessagePayload *buffer, K_U32 sender);
