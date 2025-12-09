@@ -167,7 +167,7 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     K_SetTaskR0(task, (K_SSIZE)task->ParentID);
     break;
   case SYS_GET_LEADER_ID:
-    K_SetTaskR0(task, (K_SSIZE)K_GetMainTask(task->GroupID));
+    K_SetTaskR0(task, (K_SSIZE)K_GetMainTask(task->GroupID)->TaskID);
     break;
   case SYS_CREATE_THREAD:
     K_SetTaskR0(task, K_CallCreateThread((K_HANDLE)arg1, arg2));
