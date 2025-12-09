@@ -15,7 +15,7 @@ KERNEL_FILE = $(ROOTDIR)/$(KERNEL).sys
 LIB_NAME = simp
 LIB_FILE = $(ROOTDIR)/lib$(LIB_NAME).a
 
-MODULES = uart shell
+MODULES = uart pci
 
 #### TOOLS CONFIG ####
 

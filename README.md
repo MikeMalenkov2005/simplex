@@ -8,11 +8,13 @@ System Modules
 
 General:
 - `uart` is a UART driver that uses the DSP for communication.
+- `pci` is a PCI driver that detects and manages PCI devices.
 - `shell` is a simple command processor (shell).
 
 Only for x86:
 - `x86vga` is a simple VGA text mode driver.
 - `x86ps2` is a PS/2 keyboard driver.
+- `x86tty` is a local TTY emulator for PS/2 + VGA.
 
 Kernel Features
 ---------------
