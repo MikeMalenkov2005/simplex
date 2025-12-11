@@ -51,7 +51,7 @@ void UART_Reply(UART_Packet *packet, K_U8 length, int tid)
 {
   packet->Header.Action = DSP_REPLY;
   packet->Header.Length = length;
-  (void)sys_send(packet, tid);
+  (void)sys_fire(packet, tid);
 }
 
 int main(const char *args)
@@ -66,7 +66,7 @@ int main(const char *args)
   UART_Config(115200, 3);
   while (*args) UART_BufferPush(&TxBuffer, *args++, FALSE);
 
-  for (tid = -1; tid; tid = sys_poll(&packet, -1))
+  while ((tid = sys_poll(&packet)))
   {
     while (UART_LineState() & 1) (void)UART_BufferPush(&RxBuffer, UART_RxByte(), TRUE);
     if (tid != -1) switch(packet.Header.Action) /* The most simple implementation */

@@ -1,7 +1,6 @@
 #ifndef _K_TASK_H
 #define _K_TASK_H
 
-#include "message.h"
 #include "share.h"
 #include "tls.h"
 
@@ -14,20 +13,21 @@
 #define K_TASK_THREAD (1 << 1)
 
 #define K_TASK_MODE_RUNNING       1
-#define K_TASK_MODE_WAIT_MESSAGE  2
-#define K_TASK_MODE_WAIT_TIME     3
-#define K_TASK_MODE_WAIT_IRQ      4
-#define K_TASK_MODE_PROCESS_IRQ   5
+#define K_TASK_MODE_SEND_MESSAGE  2
+#define K_TASK_MODE_WAIT_MESSAGE  3
+#define K_TASK_MODE_WAIT_TIME     4
+#define K_TASK_MODE_WAIT_IRQ      5
+#define K_TASK_MODE_PROCESS_IRQ   6
 
 struct K_Task
 {
   K_TLS *pTLS;
   K_ShareInfo *pShareInfo;
-  K_MessageQueue *pMessageQueue;
   K_HANDLE WaitInfo;
   K_HANDLE PageMap;
   K_HANDLE Context;
   K_HANDLE Handler;
+  K_U32 TargetID;   /* for targeted operations  */
   K_U32 ParentID;   /* POSIX: parent thread id  */
   K_U32 TaskID;     /* POSIX: thread id         */
   K_U32 GroupID;    /* POSIX: process id        */
@@ -38,24 +38,27 @@ struct K_Task
 
 typedef struct K_Task K_Task;
 
-void K_InitTaskSlots();
-K_Task *K_GetCurrentTask();
+void K_InitTaskSlots(void);
+K_Task *K_GetCurrentTask(void);
+K_BOOL K_SetCurrentTask(K_Task *task);
 
 K_Task *K_GetTask(K_U32 tid);
 K_Task *K_GetMainTask(K_U32 gid);
 
 K_Task *K_CreateTask(K_USIZE stack, K_U16 flags);
 K_BOOL K_DeleteTask(K_Task *task);
-K_BOOL K_SwitchTask();
+K_BOOL K_SwitchTask(void);
 
 K_BOOL K_WaitTicks(K_USIZE duration);
 
-K_BOOL K_SendMessage(K_Task *target, K_Message *message);
-K_BOOL K_WaitMessage(K_MessagePayload *buffer, K_U32 sender);
+K_BOOL K_SendMessage(K_HANDLE buffer, K_Task *target);
+K_BOOL K_PollMessage(K_HANDLE buffer);
+K_BOOL K_WaitMessage(K_HANDLE buffer);
+K_BOOL K_FireMessage(K_HANDLE buffer, K_Task *target);
 
 K_BOOL K_WaitTaskIRQ(K_USIZE irq);
 K_BOOL K_BeginTaskIRQ(K_USIZE irq);
-void K_EndTaskIRQ();
+void K_EndTaskIRQ(void);
 
 K_HANDLE K_GetTaskIP(K_Task *task);
 void K_SetTaskIP(K_Task *task, K_HANDLE ip);

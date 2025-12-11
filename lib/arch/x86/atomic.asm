@@ -1,6 +1,8 @@
 [bits 32]
 
 global __crt_atomic_swap
+global __crt_atomic_get_add
+global __crt_atomic_compare_swap
 
 section .text
 

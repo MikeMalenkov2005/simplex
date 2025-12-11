@@ -61,10 +61,13 @@ static void VGA_Scroll(K_U8 lines)
   else VGA_ClearScreen();
 }
 
-static void VGA_SendInfo(int tid)
+static void VGA_GetInfo(VGA_Info *info)
 {
-  VGA_Info info = { 25, 80, text_cursor, text_color, 0, { 0 } };
-  (void)sys_send(&info, tid);
+  memset(info, 0, sizeof(*info));
+  info->rows = 25;
+  info->columns = 80;
+  info->cursor = text_cursor;
+  info->color = text_color;
 }
 
 int main()
@@ -75,8 +78,8 @@ int main()
   text_screen = sys_map(0xB8000, 4000, MAP_RD | MAP_WR);
   VGA_ShowTextCursor(14, 15);
   VGA_ClearScreen();
-  
-  while ((tid = sys_wait(&message, -1))) if (tid != -1)
+
+  while ((tid = sys_wait(message)) != -1)
   {
     for (i = 0; i < K_MESSAGE_SIZE && message[i]; ++i) switch (message[i++])
     {
@@ -130,10 +133,11 @@ int main()
       if (i < K_MESSAGE_SIZE) VGA_Scroll(message[i]);
       break;
     case VGA_GET_INFO:
-      VGA_SendInfo(tid);
-      --i;
+      VGA_GetInfo((void*)message);
+      i = K_MESSAGE_SIZE;
       break;
     }
+    sys_fire(message, tid);
   }
   return 0;
 }
