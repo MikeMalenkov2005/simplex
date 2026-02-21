@@ -10,7 +10,7 @@ static K_U8 text_color = 7;
 
 static void VGA_FillU16(K_U16 *buffer, K_U16 value, K_USIZE size)
 {
-  while (size--) *buffer++ = value;
+  while (size--) buffer[size] = value;
 }
 
 static void VGA_UpdateTextCursor()
@@ -52,8 +52,8 @@ static void VGA_Scroll(K_U8 lines)
   const size_t chars = lines * 80;
   if (lines < 25)
   {
-    memcpy(text_screen, text_screen + (chars << 1), 4000 - (chars << 1));
-    VGA_FillU16(text_screen + 2000 - chars, text_color << 8, chars);
+    memmove(text_screen, text_screen + chars, 4000 - (chars << 1));
+    VGA_FillU16(text_screen + (2000 - chars), text_color << 8, chars);
     if ((text_cursor & 0x7FFF) > chars) text_cursor -= chars;
     else text_cursor = (text_cursor & 0x8000) | ((text_cursor & 0x7FFF) % 80);
     VGA_UpdateTextCursor();
@@ -96,7 +96,7 @@ int main()
       {
         text_screen[text_cursor & 0x7FFF] = message[i] | (text_color << 8);
         if ((++text_cursor & 0x7FFF) >= 2000) VGA_Scroll(1);
-        VGA_UpdateTextCursor();
+        else VGA_UpdateTextCursor();
       }
       break;
     case VGA_SET_SYMBOL:
