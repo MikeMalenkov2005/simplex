@@ -13,7 +13,9 @@ typedef unsigned long size_t;
 typedef signed long ptrdiff_t;
 typedef short wchar_t;
 
-#define offsetof(type, member) ((size_t)&(*(type*)NULL).member)
+#ifndef offsetof
+#define offsetof(type, member) ((size_t)&((type*)NULL)->member))
+#endif
 
 #endif
 
