@@ -1,8 +1,18 @@
 #ifndef _DRV_UART_H
 #define _DRV_UART_H
 
-#include <simplex.h>
-#include <sys/dsp.h>
+#include <sys/limits.h>
+#include <sys/types.h>
+
+#define UART_RECEIVE    1
+#define UART_TRANSMIT   2
+#define UART_GET_CONFIG 3
+#define UART_SET_CONFIG 4
+
+#define UART_RECEIVE_S    "\001"
+#define UART_TRANSMIT_S   "\002"
+#define UART_GET_CONFIG_S "\003"
+#define UART_SET_CONFIG_S "\004"
 
 #define UART_LINE_5BITS 0
 #define UART_LINE_6BITS 1
@@ -17,28 +27,36 @@
 #define UART_LINE_MARK  (5 << 3)
 #define UART_LINE_SPACE (7 << 3)
 
-#define UART_CFG  (DSP_USER | 0)
-
-struct UART_Cfg
+struct UART_Config
 {
-  DSP_Header Header;
+  K_U8 Command;
+  K_U8 LineControl;
+  K_U16 Reserved;
   K_U32 BaudRate;
-  K_U32 LineControl;
+  K_U8 Padding[K_MESSAGE_SIZE - 8];
 };
 
-typedef struct UART_Cfg UART_Cfg;
+typedef struct UART_Config UART_Config;
+
+struct UART_Data
+{
+  K_U8 Command;
+  K_U8 Size;
+  K_U8 Buffer[K_MESSAGE_SIZE - 2];
+};
+
+typedef struct UART_Data UART_Data;
 
 union UART_Packet
 {
-  DSP_Header Header;
-  DSP_Packet Common;
-  UART_Cfg Config;
+  K_U8 Command;
+  UART_Data Data;
+  UART_Config Config;
 };
 
 typedef union UART_Packet UART_Packet;
 
-#define UART_Send(packet) sys_send(packet, 1)
-#define UART_Wait(packet) sys_wait(packet, 1)
+#define UART_TASK_ID  1
 
 #endif
 

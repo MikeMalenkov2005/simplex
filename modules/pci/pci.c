@@ -42,7 +42,7 @@ static void PCI_ScanSlot(K_U8 bus, K_U8 slot)
 static void PCI_ScanBus(K_U8 bus)
 {
   K_U8 slot = 0;
-  while (slot < 32) PCI_ScanSlot(bus, slot);
+  while (slot < 32) PCI_ScanSlot(bus, slot++);
 }
 
 void PCI_ScanDevices(void)

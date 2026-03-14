@@ -119,7 +119,7 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
       K_SetTaskR0(task, -1);
     break;
   case SYS_POLL:
-    if (K_PollMessage((K_HANDLE)arg1)) K_SetTaskR0(task, 0);
+    (void)K_PollMessage((K_HANDLE)arg1);
     break;
   case SYS_WAIT:
     (void)K_WaitMessage((K_HANDLE)arg1);

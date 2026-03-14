@@ -220,7 +220,6 @@ K_BOOL K_SwitchTask(void)
           task->Mode = K_TASK_MODE_RUNNING;
           if (K_SetCurrentTask(task))
           {
-
             K_SetTaskR0(task, -1);
             return TRUE;
           }
@@ -272,15 +271,13 @@ K_BOOL K_SendMessage(K_HANDLE buffer, K_Task *target)
 
 K_BOOL K_PollMessage(K_HANDLE buffer)
 {
-  K_Task *target, *task = K_GetCurrentTask();
+  K_Task *task = K_GetCurrentTask();
   K_USIZE i = K_TASK_LIMIT;
   if (!task || K_CurrentTaskIRQ || !K_IsUserRange(buffer,
         K_MESSAGE_SIZE, K_PAGE_READABLE | K_PAGE_WRITABLE)) return FALSE;
-  target = K_GetTask(task->TargetID);
   task->WaitInfo = buffer;
   task->TargetID = K_TASK_INVALID_ID;
   task->Mode = K_TASK_MODE_WAIT_MESSAGE;
-  if (target && target != task) (void)K_TransferMessage(task, target);
   while (i--) if (K_TaskSlots[i].TargetID == task->TaskID &&
       K_TaskSlots[i].Mode == K_TASK_MODE_SEND_MESSAGE &&
       K_TransferMessage(K_TaskSlots + i, task))
@@ -289,6 +286,7 @@ K_BOOL K_PollMessage(K_HANDLE buffer)
     return TRUE;
   }
   task->WaitInfo = NULL;
+  task->TargetID = K_TASK_INVALID_ID;
   task->Mode = K_TASK_MODE_RUNNING;
   return FALSE;
 }
@@ -318,8 +316,6 @@ K_BOOL K_WaitMessage(K_HANDLE buffer)
   }
   return TRUE;
 }
-
-extern void K_DebugHex(K_U16 x, K_U16 y, K_USIZE value);
 
 K_BOOL K_FireMessage(K_HANDLE buffer, K_Task *target)
 {

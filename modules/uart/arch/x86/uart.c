@@ -19,13 +19,27 @@
 #define MSR 6 /* Modem Status Register              */
 #define SR  7 /* Scratch Register                   */
 
-void UART_Config(K_U32 baud, K_U8 lcr)
+static K_U32 BaudRate;
+static K_U8 LineControl;
+
+void UART_GetConfig(UART_Config *config)
 {
-  K_U32 divisor = baud ? 115200 / baud : 1;
-  PIO_Write8(COM1 + LCR, lcr | 0x80);
+  if (!config) return;
+  config->BaudRate = BaudRate;
+  config->LineControl = LineControl;
+}
+
+void UART_SetConfig(const UART_Config *config)
+{
+  K_U32 divisor;
+  if (!config) return;
+  BaudRate = config->BaudRate;
+  LineControl = config->LineControl;
+  divisor = BaudRate ? 115200 / BaudRate : 1;
+  PIO_Write8(COM1 + LCR, LineControl | 0x80);
   PIO_Write8(COM1 + DLL, (K_U8)divisor);
   PIO_Write8(COM1 + DLH, (K_U8)(divisor >> 8));
-  PIO_Write8(COM1 + LCR, lcr & 0x7F);
+  PIO_Write8(COM1 + LCR, LineControl & 0x7F);
   PIO_Write8(COM1 + IER, 0);
   PIO_Write8(COM1 + FCR, 7);
 }
