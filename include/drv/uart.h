@@ -56,7 +56,5 @@ union UART_Packet
 
 typedef union UART_Packet UART_Packet;
 
-#define UART_TASK_ID  1
-
 #endif
 

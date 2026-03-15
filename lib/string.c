@@ -36,16 +36,14 @@ char *strncat(char *s1, const char *s2, size_t n)
 
 int strcmp(const char *s1, const char *s2)
 {
-  int result;
-  while (!(result = (int)*s1++ - (int)*s2++));
-  return result;
+  while (*s1 && *s2 && *s1 == *s2) ++s1, ++s2;
+  return (int)*s1 - (int)*s2;
 }
 
 int strncmp(const char *s1, const char *s2, size_t n)
 {
-  int result = 0;
-  while (n-- && !(result = (int)*s1++ - (int)*s2++));
-  return result;
+  while (n-- && *s1 && *s2 && *s1 == *s2) ++s1, ++s2;
+  return (int)*s1 - (int)*s2;
 }
 
 void *memchr(const void *s, int c, size_t n)

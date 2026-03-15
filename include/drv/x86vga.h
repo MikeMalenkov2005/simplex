@@ -39,7 +39,5 @@ typedef struct VGA_Info
   K_U8 padding[K_MESSAGE_SIZE - 8];
 } VGA_Info;
 
-#define VGA_TASK_ID 3
-
 #endif
 

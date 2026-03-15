@@ -41,6 +41,8 @@
 #define SYS_IRQ_WAIT  30 /* Wait For IRQ (irq)  */
 #define SYS_IRQ_EXIT  31 /* Exit IRQ Loop       */
 
+#define SYS_CHECK_TASK  32  /* Check if the task exists (tid) -> flags or -1 */
+
 /* Signal Handlers MUST preserve ALL GP-Registers and CPU flags */
 
 /* * * * * * * * * * * * * * * *

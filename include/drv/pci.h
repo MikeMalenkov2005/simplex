@@ -2,9 +2,18 @@
 #define _DRV_PCI_H
 
 #include <sys/types.h>
+#include <sys/limits.h>
+
+#define PCI_READ_CONFIG 1
+#define PCI_FIND_DEVICE 3
+
+#define PCI_READ_CONFIG_S "\001"
+#define PCI_FIND_DEVICE_S "\003"
 
 #define PCI_Device(bus, slot, function) \
   ((((bus) & 0xFF) << 8) | (((slot) & 0x1F) << 3) | ((function) & 7))
+
+#define PCI_INVALID_DEVICE  (~(K_U32)0)
 
 #define PCI_OFFSET_VENDOR_ID        0
 #define PCI_OFFSET_DEVICE_ID        2
@@ -26,6 +35,25 @@
 #define PCI_OFFSET_BAR4 32
 #define PCI_OFFSET_BAR5 36
 #define PCI_OFFSET_CIS  40
+
+struct PCI_Packet
+{
+  K_U8 Command;
+  
+  K_U8 Class;
+  K_U8 Subclass;
+  K_U8 Interface;
+  K_U16 VendorID;
+  K_U16 DeviceID;
+  
+  K_U32 Offset;
+  K_U32 Device;
+  K_U32 Config;
+  
+  K_U8 Padding[K_MESSAGE_SIZE - 20];
+};
+
+typedef struct PCI_Packet PCI_Packet;
 
 #endif
 

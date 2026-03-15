@@ -12,7 +12,5 @@
 #define PS2_COMMAND_S "\002"
 #define PS2_DETECT_S  "\003"
 
-#define PS2_TASK_ID 4
-
 #endif
 

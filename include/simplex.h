@@ -55,5 +55,7 @@ long __syscall(long number, long arg1, long arg2, long arg3);
 #define sys_irq_wait(irq) syscall(SYS_IRQ_WAIT, irq)
 #define sys_irq_exit() syscall(SYS_IRQ_EXIT)
 
+#define sys_check(tid) syscall(SYS_CHECK_TASK, tid)
+
 #endif
 

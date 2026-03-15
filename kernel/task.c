@@ -74,7 +74,7 @@ K_Task *K_GetMainTask(K_U32 gid)
 {
   K_U32 i = K_TASK_LIMIT;
   while (i--) if (K_TaskSlots[i].GroupID == gid &&
-      !(K_TaskSlots[i].Flags & K_TASK_THREAD)) return K_TaskSlots + i;
+      !(K_TaskSlots[i].Flags & TASK_THREAD)) return K_TaskSlots + i;
   return NULL;
 }
 
@@ -85,7 +85,7 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
   K_U32 i = K_TASK_LIMIT;
   if (K_CurrentTaskIRQ || K_NextTaskID == K_TASK_INVALID_ID) return NULL;
   if (K_NextGroupID > K_TASK_MAX_GROUP_ID &&
-      (K_CurrentSlot >= K_TASK_LIMIT || (flags & K_TASK_THREAD))) return NULL;
+      (K_CurrentSlot >= K_TASK_LIMIT || (flags & TASK_THREAD))) return NULL;
   while (i--) if (!K_TaskSlots[i].Mode)
   {
     task = K_TaskSlots + i;
@@ -95,7 +95,7 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
   {
     if (K_CurrentSlot < K_TASK_LIMIT)
     {
-      if (flags & K_TASK_THREAD)
+      if (flags & TASK_THREAD)
         task->PageMap = K_TaskSlots[K_CurrentSlot].PageMap;
       else if (!(task->PageMap = K_CreatePageMap())) return NULL;
       task->ParentID = K_TaskSlots[K_CurrentSlot].TaskID;
@@ -103,12 +103,12 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
     else
     {
       task->PageMap = map;
-      flags &= ~K_TASK_THREAD;
+      flags &= ~TASK_THREAD;
       K_CurrentSlot = i;
     }
 
     if (map != task->PageMap) K_SetPageMap(task->PageMap);
-    if (!(task->pTLS = K_CreateTLS((flags & K_TASK_THREAD)
+    if (!(task->pTLS = K_CreateTLS((flags & TASK_THREAD)
             ? K_TaskSlots[K_CurrentSlot].pTLS : NULL)) ||
         !(task->pShareInfo = K_CreateShareInfo()) ||
         !(task->Context = K_CreateContext(stack, flags))) 
@@ -121,7 +121,7 @@ K_Task *K_CreateTask(K_USIZE stack, K_U16 flags)
     
     if (K_CurrentSlot == i) K_LoadContext(task->Context);
 
-    task->GroupID = (flags & K_TASK_THREAD)
+    task->GroupID = (flags & TASK_THREAD)
       ? K_TaskSlots[K_CurrentSlot].GroupID : K_NextGroupID++;
     task->TaskID = K_NextTaskID++;
     task->Flags = flags;
@@ -135,17 +135,17 @@ K_BOOL K_DeleteTask(K_Task *task)
   K_HANDLE map;
   K_U32 i = K_TASK_LIMIT;
   if (!task || K_CurrentTaskIRQ) return FALSE;
-  if (!(task->Flags & K_TASK_THREAD)) while (i--)
+  if (!(task->Flags & TASK_THREAD)) while (i--)
   {
     if (K_TaskSlots[i].GroupID == task->GroupID &&
-        (K_TaskSlots[i].Flags & K_TASK_THREAD))
+        (K_TaskSlots[i].Flags & TASK_THREAD))
     {
       (void)K_DeleteTask(K_TaskSlots + i);
     }
   }
   if (task == K_TaskSlots + K_CurrentSlot && !K_SwitchTask()) return FALSE;
   map = K_GetPageMap();
-  if (task->Flags & K_TASK_THREAD)
+  if (task->Flags & TASK_THREAD)
   {
     if (map != task->PageMap) K_SetPageMap(task->PageMap);
     K_DeleteTLS(task->pTLS);
@@ -333,7 +333,7 @@ K_BOOL K_FireMessage(K_HANDLE buffer, K_Task *target)
 K_BOOL K_WaitTaskIRQ(K_USIZE irq)
 {
   K_Task *task = K_GetCurrentTask();
-  if (!task || !(task->Flags & K_TASK_MODULE)) return FALSE;
+  if (!task || !(task->Flags & TASK_MODULE)) return FALSE;
   K_EndTaskIRQ();
   if (task == K_TaskSlots + K_CurrentSlot && !K_SwitchTask()) return FALSE;
   task->WaitInfo = (K_HANDLE)irq;

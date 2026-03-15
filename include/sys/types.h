@@ -1,43 +1,21 @@
 #ifndef _SYS_TYPES_H
 #define _SYS_TYPES_H
 
-typedef unsigned char   K_U8;
-typedef unsigned short  K_U16;
-typedef unsigned int    K_U32;
+typedef unsigned char       K_U8;
+typedef unsigned short      K_U16;
+typedef unsigned int        K_U32;
+typedef unsigned long long  K_U64;
 
-typedef signed char   K_S8;
-typedef signed short  K_S16;
-typedef signed int    K_S32;
+typedef signed char       K_S8;
+typedef signed short      K_S16;
+typedef signed int        K_S32;
+typedef signed long long  K_S64;
 
 typedef unsigned long K_USIZE;
 typedef signed long   K_SSIZE;
 
 typedef void *K_HANDLE;
 typedef K_S32 K_BOOL;
-
-union K_U64S
-{
-  K_USIZE Value;
-#ifndef K_BIG_ENDIAN
-  struct { K_U32 Low, High; };
-#else
-  struct { K_U32 High, Low; };
-#endif
-};
-
-typedef union K_U64S K_U64S;
-
-union K_S64S
-{
-  K_SSIZE Value;
-#ifndef K_BIG_ENDIAN
-  struct { K_U32 Low, High; };
-#else
-  struct { K_U32 High, Low; };
-#endif
-};
-
-typedef union K_S64S K_S64S;
 
 #define TRUE  1
 #define FALSE 0

@@ -14,7 +14,7 @@ K_SSIZE K_LocalTimeZone;
 
 static K_SSIZE K_CallCreateThread(K_HANDLE entry, K_USIZE stack)
 {
-  K_Task *task = K_CreateTask(stack, K_GetCurrentTask()->Flags | K_TASK_THREAD);
+  K_Task *task = K_CreateTask(stack, K_GetCurrentTask()->Flags | TASK_THREAD);
   if (!task) return -1;
   K_SetTaskIP(task, entry);
   return task->TaskID;
@@ -104,6 +104,11 @@ static K_BOOL K_CallChangeMapping(K_HANDLE address, K_USIZE size, K_USIZE mode)
   return K_ChangePages(address, size, flags);
 }
 
+static K_SSIZE K_CheckTask(K_Task *task)
+{
+  return task ? (K_SSIZE)task->Flags : -1;
+}
+
 void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg3)
 {
   K_Task *task = K_GetCurrentTask();
@@ -181,7 +186,7 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
     {
       K_SetTaskR0(task, (K_SSIZE)(K_USIZE)K_CallMapMemory(arg2, arg3));
     }
-    else if (!(arg1 & K_PAGE_FLAGS_MASK) && (task->Flags & K_TASK_MODULE))
+    else if (!(arg1 & K_PAGE_FLAGS_MASK) && (task->Flags & TASK_MODULE))
     {
       K_SetTaskR0(task, (K_SSIZE)(K_USIZE)K_CallMapDevice(arg1, arg2, arg3));
     }
@@ -216,6 +221,10 @@ void K_SystemCallDispatch(K_USIZE index, K_USIZE arg1, K_USIZE arg2, K_USIZE arg
   case SYS_IRQ_EXIT:
     K_SetTaskR0(task, 0);
     K_EndTaskIRQ();
+    break;
+  case SYS_CHECK_TASK:
+    
+    K_SetTaskR0(task, K_CheckTask(K_GetTask((K_U32)arg1)));
     break;
   }
 }

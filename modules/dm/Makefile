@@ -1,7 +1,7 @@
 ROOTDIR = ../..
 include $(ROOTDIR)/config.mk
 
-MODULE_FILE = $(ROOTDIR)/x86tty.sys
+MODULE_FILE = $(ROOTDIR)/dm.sys
 
 LDFLAGS += -l$(LIB_NAME)
 
@@ -14,5 +14,5 @@ $(OBJECTS): %.o: %.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
-	rm *.o $(MODULE_FILE)
+	rm *.o arch/*/*.o $(MODULE_FILE)
 

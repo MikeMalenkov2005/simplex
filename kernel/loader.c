@@ -33,7 +33,8 @@ K_BOOL K_LoadElf32Segment(const struct Elf32_Phdr *phdr, K_HANDLE image, K_USIZE
   if (phdr->p_memsz)
   {
     if (!K_AllocatePages(address, phdr->p_memsz, flags)) return FALSE;
-    (void)memcpy(address, data, phdr->p_filesz);
+    (void)memcpy(address, data,
+        phdr->p_filesz < phdr->p_memsz ? phdr->p_filesz : phdr->p_memsz);
   }
   return TRUE;
 }
@@ -76,22 +77,26 @@ K_BOOL K_LoadElf32Image(K_HANDLE image, K_USIZE size, K_HANDLE *entry)
 
 K_BOOL K_LoadElf64Segment(const struct Elf64_Phdr *phdr, K_HANDLE image, K_USIZE size)
 {
-  K_HANDLE address = (K_HANDLE)(K_USIZE)phdr->p_vaddr.Value;
-  K_HANDLE data = image + phdr->p_offset.Value;
+  K_HANDLE address = (K_HANDLE)(K_USIZE)phdr->p_vaddr;
+  K_HANDLE data = image + phdr->p_offset;
   K_U16 flags = K_PAGE_USER_MODE;
-  if (size < phdr->p_offset.Value + phdr->p_filesz.Value) return FALSE;
-  if (phdr->p_filesz.Value && !(phdr->p_flags & (PF_R | PF_W | PF_X))) return FALSE;
+  if (size < phdr->p_offset + phdr->p_filesz) return FALSE;
+  if (phdr->p_filesz && !(phdr->p_flags & (PF_R | PF_W | PF_X))) return FALSE;
   if (phdr->p_flags & PF_R) flags |= K_PAGE_READABLE;
   if (phdr->p_flags & PF_W) flags |= K_PAGE_WRITABLE;
   if (phdr->p_flags & PF_X) flags |= K_PAGE_EXECUTABLE;
-  if (!K_AllocatePages(address, phdr->p_memsz.Value, flags)) return FALSE;
-  if (phdr->p_memsz.Value) (void)memcpy(address, data, phdr->p_filesz.Value);
+  if (phdr->p_memsz)
+  {
+    if (!K_AllocatePages(address, phdr->p_memsz, flags)) return FALSE;
+    (void)memcpy(address, data,
+        phdr->p_filesz < phdr->p_memsz ? phdr->p_filesz : phdr->p_memsz);
+  }
   return TRUE;
 }
 
 void K_FreeElf64Segment(const struct Elf64_Phdr *phdr)
 {
-  if (phdr->p_memsz.Value) K_FreePages((K_HANDLE)phdr->p_vaddr.Value, phdr->p_memsz.Value);
+  if (phdr->p_memsz) K_FreePages((K_HANDLE)phdr->p_vaddr, phdr->p_memsz);
 }
 
 K_BOOL K_LoadElf64Image(K_HANDLE image, K_USIZE size, K_HANDLE *entry)
@@ -105,21 +110,21 @@ K_BOOL K_LoadElf64Image(K_HANDLE image, K_USIZE size, K_HANDLE *entry)
   if (ehdr->e_type != ET_EXEC || ehdr->e_machine != K_EM_CUR64) return FALSE;
   if (ehdr->e_version != EV_CURRENT || ehdr->e_ehsize != sizeof *ehdr) return FALSE;
   if (ehdr->e_phentsize != sizeof(struct Elf64_Phdr)) return FALSE;
-  if (size < ehdr->e_phoff.Value + ehdr->e_phnum * ehdr->e_phentsize) return FALSE;
+  if (size < ehdr->e_phoff + ehdr->e_phnum * ehdr->e_phentsize) return FALSE;
   count = ehdr->e_phnum;
   for (index = 0; index < count; ++index)
   {
-    if (!K_LoadElf64Segment(image + ehdr->e_phoff.Value + ehdr->e_phentsize * index, image, size))
+    if (!K_LoadElf64Segment(image + ehdr->e_phoff + ehdr->e_phentsize * index, image, size))
     {
       count = index;
       for (index = 0; index < count; ++index)
       {
-        K_FreeElf64Segment(image + ehdr->e_phoff.Value + ehdr->e_phentsize * index);
+        K_FreeElf64Segment(image + ehdr->e_phoff + ehdr->e_phentsize * index);
       }
       return FALSE;
     }
   }
-  *entry = (K_HANDLE)ehdr->e_entry.Value;
+  *entry = (K_HANDLE)ehdr->e_entry;
   return TRUE;
 }
 

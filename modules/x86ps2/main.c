@@ -1,5 +1,6 @@
 #include "ps2.h"
 
+#include <drv/dm.h>
 #include <drv/x86ps2.h>
 #include <sys/limits.h>
 #include <simplex.h>
@@ -100,15 +101,6 @@ void irq_handler()
   sys_exit(0);
 }
 
-#include <drv/x86vga.h>
-
-void putch(int ch)
-{
-  K_U8 output[K_MESSAGE_SIZE] = VGA_PUT_SYMBOL_S;
-  output[1] = ch;
-  sys_send(output, VGA_TASK_ID);
-}
-
 K_BOOL PS2_Init(void)
 {
   K_U8 data, dual_port, failed[2];
@@ -160,6 +152,7 @@ int main(void)
 {
   K_U8 msg[K_MESSAGE_SIZE];
   int tid = -1, to;
+  if (!DM_Register("PS/2")) return 1;
   if (!PS2_Init()) return 1;
   if (sys_thread(irq_handler, 0) == -1) return 1;
   while ((tid = sys_wait(msg)) != -1)

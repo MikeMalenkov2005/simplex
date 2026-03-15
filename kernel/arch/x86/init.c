@@ -133,7 +133,7 @@ void K_ArchInit(K_BootInfo *info, ISR_Frame *frame)
 
   K_InitTaskSlots();
   TASK_SetFrame(frame);
-  idle = K_CreateTask(0, K_TASK_MODULE);
+  idle = K_CreateTask(0, TASK_MODULE);
   address = K_FindFirstFreeAddress(K_IdleSize);
   if (!address || !K_AllocatePages(address, K_IdleSize, K_PAGE_READABLE | K_PAGE_EXECUTABLE | K_PAGE_USER_MODE)) K_Panic("no idle!");
   K_SetTaskIP(idle, memcpy(address, &K_Idle, K_IdleSize));
@@ -141,7 +141,7 @@ void K_ArchInit(K_BootInfo *info, ISR_Frame *frame)
   K_BootForEach(info, tag) if (tag->Type == K_BOOT_TAG_MODULE)
   {
     mod = (K_HANDLE)tag;
-    module = K_CreateTask(0, K_TASK_MODULE);
+    module = K_CreateTask(0, TASK_MODULE);
     if (module)
     {
       K_SetPageMap(module->PageMap);

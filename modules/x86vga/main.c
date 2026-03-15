@@ -1,3 +1,4 @@
+#include <drv/dm.h>
 #include <drv/x86vga.h>
 #include <sys/memory.h>
 #include <x86/pio.h>
@@ -75,6 +76,7 @@ int main()
   int tid = -1, i;
   K_U8 message[K_MESSAGE_SIZE];
 
+  (void)DM_Register("VGA");
   text_screen = sys_map(0xB8000, 4000, MAP_RD | MAP_WR);
   VGA_ShowTextCursor(14, 15);
   VGA_ClearScreen();

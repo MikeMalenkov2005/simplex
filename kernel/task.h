@@ -1,6 +1,8 @@
 #ifndef _K_TASK_H
 #define _K_TASK_H
 
+#include <sys/task.h>
+
 #include "share.h"
 #include "tls.h"
 
@@ -8,9 +10,6 @@
 
 #define K_TASK_INVALID_ID (~(K_U32)0)
 #define K_TASK_MAX_GROUP_ID (K_TASK_INVALID_ID >> 1)
-
-#define K_TASK_MODULE (1 << 0)
-#define K_TASK_THREAD (1 << 1)
 
 #define K_TASK_MODE_RUNNING       1
 #define K_TASK_MODE_SEND_MESSAGE  2

@@ -1,8 +1,9 @@
 #include "uart.h"
 
-#include <simplex.h>
+#include <drv/dm.h>
 #include <drv/uart.h>
 #include <sys/memory.h>
+#include <simplex.h>
 
 struct UART_Buffer
 {
@@ -55,6 +56,7 @@ int main(const char *args)
   K_U8 byte;
   int tid;
 
+  (void)DM_Register("UART");
   UART_BufferClear(&RxBuffer);
   UART_BufferClear(&TxBuffer);
   packet.Config.LineControl = 3;

@@ -9,13 +9,13 @@ typedef K_U16 Elf32_Half;
 typedef K_U32 Elf32_Word;
 typedef K_S32 Elf32_Sword;
 
-typedef K_U64S  Elf64_Addr;
-typedef K_U64S  Elf64_Off;
-typedef K_U16   Elf64_Half;
-typedef K_U32   Elf64_Word;
-typedef K_S32   Elf64_Sword;
-typedef K_U64S  Elf64_Xword;
-typedef K_S64S  Elf64_Sxword;
+typedef K_U64 Elf64_Addr;
+typedef K_U64 Elf64_Off;
+typedef K_U16 Elf64_Half;
+typedef K_U32 Elf64_Word;
+typedef K_S32 Elf64_Sword;
+typedef K_U64 Elf64_Xword;
+typedef K_S64 Elf64_Sxword;
 
 #define EI_MAG0       0
 #define EI_MAG1       1
