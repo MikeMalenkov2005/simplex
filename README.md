@@ -7,14 +7,13 @@ System Modules
 --------------
 
 General:
-- `uart` is a UART driver that uses the DSP for communication.
+- `dm` is a driver manager for registring and finding drivers.
+- `uart` is a UART driver for external terminal I/O.
 - `pci` is a PCI driver that detects and manages PCI devices.
-- `shell` is a simple command processor (shell).
 
 Only for x86:
 - `x86vga` is a simple VGA text mode driver.
 - `x86ps2` is a PS/2 keyboard driver.
-- `x86tty` is a local TTY emulator for PS/2 + VGA.
 
 Kernel Features
 ---------------
@@ -50,7 +49,7 @@ Fully implemented headers:
 - `assert.h` - standard assertions
 - `stdarg.h` - macros for builtins
 - `float.h` - float constants
-- `sting.h` - `str*` and `mem*` functions
+- `string.h` - `str*` and `mem*` functions
 - `time.h` - timing functions and structs
 
 Partially implemented headers:
@@ -69,8 +68,10 @@ General:
 - `sys/limits.h` - kernel limit constants
 - `sys/syscall.h` - syscall function and constants
 - `sys/memory.h` - memory syscall flags
-- `sys/dsp.h` - DSP structs and constants
+- `sys/task.h` - task flags (returned by `sys_check`)
 - `sys/elf.h` - ELF structs and constants
+- `drv/dm.h` - DM (driver manager) API functions
+- `drv/pci.h` - PCI driver API structs and macros
 - `drv/uart.h` - UART driver API structs and macros
 - `simplex.h` - syscall macros (`sys_*`)
 
@@ -83,31 +84,4 @@ POSIX Standard implementation
 -----------------------------
 
 Currently POSIX is not supported.
-
-Drived Streaming Protocol
--------------------------
-
-The Drived Streaming Protocol (DSP) defines the general message structure
-utilized for data streaming between through driver tasks.
-
-The general packet structure:
-1. 2-byte stream/device id
-2. 1-byte action/packet id
-3. 1-byte the payload size
-4. the payload data
-
-The stream id is used to distinguish multiple streams opened for one task.
-
-The payload data depends on the action id and the payload size.
-
-The payload size can be used to indicate if an error has occured.
-
-If the action is any type of request except read or write,
-the payload size should be set to zero by the client and ignored by the driver.
-
-If the action is a reply then the payload size specifies,
-how many bytes was successfuly read or written by the driver.
-
-All action ids from 0 upto 127 are reserved by the protocol.
-Action ids from 128 upto 255 can be utilized for driver-specific actions.
 
