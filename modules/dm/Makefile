@@ -14,5 +14,5 @@ $(OBJECTS): %.o: %.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
-	rm *.o arch/*/*.o $(MODULE_FILE)
+	rm *.o $(MODULE_FILE)
 
