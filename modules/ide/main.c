@@ -16,7 +16,7 @@ static void init(void)
   packet.Interface = -1;
   packet.VendorID = -1;
   packet.DeviceID = -1;
-  while (~packet.Device && sys_send(&packet, PCI) != -1)
+  while (sys_send(&packet, PCI) != -1 && ~packet.Device)
   {
     IDE_Init(packet.Device);
     packet.Offset = ++offset;

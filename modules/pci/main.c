@@ -62,12 +62,12 @@ static void PCI_FilterDevice(K_U32 device, K_HANDLE context)
   PCI_Packet *packet = context;
   if (packet->Device != PCI_INVALID_DEVICE) return;
   r0 = PCI_ReadConfig(device, PCI_OFFSET_VENDOR_ID);
-  if (~packet->VendorID && packet->VendorID != (K_U16)(r0 >> 0)) return;
-  if (~packet->DeviceID && packet->DeviceID != (K_U16)(r0 >> 16)) return;
+  if ((K_U16)~packet->VendorID && packet->VendorID != (K_U16)(r0 >> 0)) return;
+  if ((K_U16)~packet->DeviceID && packet->DeviceID != (K_U16)(r0 >> 16)) return;
   r2 = PCI_ReadConfig(device, PCI_OFFSET_REVISION);
-  if (~packet->Interface && packet->Interface != ((r2 >> 8) & 255)) return;
-  if (~packet->Subclass && packet->Subclass != ((r2 >> 16) & 255)) return;
-  if (~packet->Class && packet->Class != ((r2 >> 24) & 255)) return;
+  if ((K_U8)~packet->Interface && packet->Interface != (K_U8)(r2 >> 8)) return;
+  if ((K_U8)~packet->Subclass && packet->Subclass != (K_U8)(r2 >> 16)) return;
+  if ((K_U8)~packet->Class && packet->Class != (K_U8)(r2 >> 24)) return;
   if (packet->Offset) --packet->Offset;
   else packet->Device = device;
 }

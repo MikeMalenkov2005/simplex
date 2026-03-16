@@ -168,7 +168,7 @@ int main(void)
     case PS2_COMMAND:
       to = 500;
       result = msg[1];
-      if (PS2_WriteData(50, msg[2]) && (!~msg[3] || PS2_WriteData(50, msg[3])))
+      if (PS2_WriteData(50, msg[2]) && PS2_WriteData(50, msg[3]))
       {
         waiting = 1;
         while (waiting && to--) sys_switch();
