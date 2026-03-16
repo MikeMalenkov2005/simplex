@@ -28,6 +28,13 @@ typedef union DM_Packet DM_Packet;
 int DM_Find(const char *name);
 
 /**
+ * @param name The name of a registered driver.
+ * @param retry The number of cycles to wait for the driver.
+ * @return -1 on failure and a task id on success.
+ */
+int DM_Wait(const char *name, unsigned retry);
+
+/**
  * @param name The name of the driver to register.
  * @return 0 on failure and a non-zero value on success.
  */

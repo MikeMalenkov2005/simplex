@@ -10,6 +10,17 @@ int DM_Find(const char *name)
   return sys_send(&packet, DM_TASK_ID) == -1 ? -1 : packet.Result;
 }
 
+int DM_Wait(const char *name, unsigned retry)
+{
+  int result = DM_Find(name);
+  while (result == -1 && retry--)
+  {
+    sys_switch();
+    result = DM_Find(name);
+  }
+  return result;
+}
+
 int DM_Register(const char *name)
 {
   DM_Packet packet = { 0 };

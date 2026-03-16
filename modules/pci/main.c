@@ -8,14 +8,7 @@ static void logch(int ch)
 {
   static int uart = -1;
   UART_Packet packet;
-  if (uart == -1)
-  {
-    uart = DM_Find("UART");
-    if (uart == -1) sys_switch(), uart = DM_Find("UART");
-    if (uart == -1) sys_switch(), uart = DM_Find("UART");
-    if (uart == -1) sys_switch(), uart = DM_Find("UART");
-    if (uart == -1) uart = 2;
-  }
+  if (uart == -1) uart = DM_Wait("UART", 512);
   packet.Command = UART_TRANSMIT;
   packet.Data.Size = 1;
   packet.Data.Buffer[0] = ch;
