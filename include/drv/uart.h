@@ -56,5 +56,16 @@ union UART_Packet
 
 typedef union UART_Packet UART_Packet;
 
+/**
+ * @return The character received on success or -1 on failure.
+ */
+int UART_RxChar(void);
+
+/**
+ * @param ch The character to transmit.
+ * @return 0 on success or -1 on failure.
+ */
+int UART_TxChar(int ch);
+
 #endif
 

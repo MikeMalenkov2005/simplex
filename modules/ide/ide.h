@@ -1,46 +1,45 @@
 #ifndef _IDE_H
 #define _IDE_H
 
-#include <sys/types.h>
+#include "bar.h"
+#include <drv/ide.h>
 
-struct IDE
+struct IDE_Device
 {
-  K_U32 Device;
-  K_HANDLE BAR[5];
+  HBAR BAR[5];
+  int Device;
+  K_U8 NIEN[2];
+  K_U16 Reserved;
 };
 
-typedef struct IDE IDE;
+typedef struct IDE_Device IDE_Device;
 
+#define IDE_CHANNEL_MASK      4
 #define IDE_CHANNEL_PRIMARY   0
-#define IDE_CHANNEL_SECONDARY 1
+#define IDE_CHANNEL_SECONDARY 4
 
-#define IDE_DRIVE_MASTER      0
-#define IDE_DRIVE_SLAVE       1
+#define IDE_DRIVE_MASK    2
+#define IDE_DRIVE_MASTER  0
+#define IDE_DRIVE_SLAVE   2
 
-#define IDE_TYPE_ATA          0
-#define IDE_TYPE_ATAPI        1
+#define IDE_TYPE_MASK   1
+#define IDE_TYPE_ATA    0
+#define IDE_TYPE_ATAPI  1
 
 struct IDE_Drive
 {
-  K_U32 CommandSets;
-  K_U32 Sectors;
+  IDE_Device *pDevice;
+  K_USIZE Size;
+  K_U32 Drive;
   K_U16 Features;
   K_U16 Signature;
-  K_U8 Channel;
-  K_U8 Drive;
-  K_U8 Type;
-  K_U8 Model[41];
+  K_U32 CommandSets;
+  K_U8 Model[44];
 };
 
 typedef struct IDE_Drive IDE_Drive;
 
-extern int PCI;
-
-void IDE_Init(K_U32 device);
-
-K_HANDLE IDE_MapBAR(K_U32 device, K_U8 index);
-K_U8 IDE_ReadBAR(K_HANDLE base, K_U8 offset);
-void IDE_WriteBAR(K_HANDLE base, K_U8 offset, K_U8 byte);
+void IDE_Init(void);
 
 #endif
 
