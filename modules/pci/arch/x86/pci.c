@@ -1,5 +1,5 @@
 #include "../../pci.h"
-#include <x86/pio.h>
+#include <sys/pio.h>
 
 K_U32 PCI_ReadConfig(K_U32 device, K_U8 offset)
 {

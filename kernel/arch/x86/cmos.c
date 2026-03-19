@@ -5,9 +5,9 @@
 #define LEAPS_BEFORE_EPOCH  477
 
 #define CMOS_Read(reg)        \
-  (K_WritePort8(0x70, reg), K_ReadPort8(0x71))
+  (PIO_Write8(0x70, reg), PIO_Read8(0x71))
 #define CMOS_Write(reg, val)  \
-  (K_WritePort8(0x70, reg), K_WritePort8(0x71, val))
+  (PIO_Write8(0x70, reg), PIO_Write8(0x71, val))
 
 #define BCD2BIN(bcd)  \
   ((((bcd) & 0xF0) >> 1) + (((bcd) & 0xF0) >> 3) + ((bcd) & 0x0F))
@@ -24,7 +24,7 @@ K_SSIZE K_GetRealTime()
 {
   int seconds, minutes, hours;
   int day, month, year, century = K_DefaultCentury;
-  int leaps, leap, nmi = K_ReadPort8(0x70) & 0x80;
+  int leaps, leap, nmi = PIO_Read8(0x70) & 0x80;
   int status = ~CMOS_Read(nmi | 0x0B);
 
   if (CMOS_CenturyOffset)
@@ -81,7 +81,7 @@ K_SSIZE K_GetRealTime()
 
 K_BOOL K_SetRealTime(K_SSIZE value)
 {
-  int day, month, year, century, check, leap, nmi = K_ReadPort8(0x70);
+  int day, month, year, century, check, leap, nmi = PIO_Read8(0x70);
   int week_day, hours, minutes, seconds, status = CMOS_Read(nmi | 0x0B);
 
   value += K_LocalTimeZone;

@@ -1,7 +1,7 @@
 #include <drv/dm.h>
 #include <drv/x86vga.h>
 #include <sys/memory.h>
-#include <x86/pio.h>
+#include <sys/pio.h>
 #include <simplex.h>
 #include <string.h>
 

@@ -1,5 +1,5 @@
-#ifndef _X86_PIO_H
-#define _X86_PIO_H
+#ifndef _SYS_PIO_H
+#define _SYS_PIO_H
 
 #include <sys/types.h>
 

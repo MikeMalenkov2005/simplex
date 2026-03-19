@@ -1,5 +1,5 @@
 #include "../../uart.h"
-#include <x86/pio.h>
+#include <sys/pio.h>
 
 #define COM1  0x3F8
 #define COM2  0x2F8

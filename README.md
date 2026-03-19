@@ -70,13 +70,13 @@ General:
 - `sys/memory.h` - memory syscall flags
 - `sys/task.h` - task flags (returned by `sys_check`)
 - `sys/elf.h` - ELF structs and constants
+- `sys/pio.h` - port I/O operations (for drivers only)
 - `drv/dm.h` - DM (driver manager) API functions
 - `drv/pci.h` - PCI driver API structs and macros
 - `drv/uart.h` - UART driver API structs and macros
 - `simplex.h` - syscall macros (`sys_*`)
 
 Only for x86:
-- `x86/pio.h` - x86 port I/O operations (for drivers only)
 - `drv/x86ps2.h` - x86 PS/2 driver structs and macros
 - `drv/x86vga.h` - x86 VGA driver structs and macros
 

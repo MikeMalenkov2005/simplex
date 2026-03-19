@@ -3,8 +3,8 @@
 #include <drv/dm.h>
 #include <drv/x86ps2.h>
 #include <sys/limits.h>
+#include <sys/pio.h>
 #include <simplex.h>
-#include <x86/pio.h>
 
 static PS2_Buffer input;
 static volatile K_U8 answer, result, waiting;

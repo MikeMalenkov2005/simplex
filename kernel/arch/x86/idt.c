@@ -87,8 +87,8 @@ void IDT_Dispatch(ISR_Frame *frame)
   else if (index == 128) K_SystemCallDispatch(frame->Eax, frame->Ebx, frame->Ecx, frame->Edx);
   if (index >= 32 && index < 48)
   {
-    if (index >= 40) K_WritePort8(0xA0, 0x20);
-    K_WritePort8(0x20, 0x20);
+    if (index >= 40) PIO_Write8(0xA0, 0x20);
+    PIO_Write8(0x20, 0x20);
   }
 }
 
