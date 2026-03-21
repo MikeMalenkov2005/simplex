@@ -61,7 +61,7 @@ int main(const char *args)
   UART_BufferClear(&TxBuffer);
   packet.Config.LineControl = 3;
   packet.Config.BaudRate = 115200;
-  UART_SetConfig(&packet.Config);
+  _UART_SetConfig(&packet.Config);
   while (*args) UART_BufferPush(&TxBuffer, *args++, FALSE);
   UART_BufferPush(&TxBuffer, '\r', FALSE);
   UART_BufferPush(&TxBuffer, '\n', FALSE);
@@ -99,10 +99,10 @@ int main(const char *args)
         packet.Data.Size = i;
         break;
       case UART_GET_CONFIG:
-        UART_GetConfig(&packet.Config);
+        _UART_GetConfig(&packet.Config);
         break;
       case UART_SET_CONFIG:
-        UART_SetConfig(&packet.Config);
+        _UART_SetConfig(&packet.Config);
         break;
       }
       sys_fire(&packet, tid);

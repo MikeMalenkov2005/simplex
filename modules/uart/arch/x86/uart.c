@@ -22,14 +22,14 @@
 static K_U32 BaudRate;
 static K_U8 LineControl;
 
-void UART_GetConfig(UART_Config *config)
+void _UART_GetConfig(UART_Config *config)
 {
   if (!config) return;
   config->BaudRate = BaudRate;
   config->LineControl = LineControl;
 }
 
-void UART_SetConfig(const UART_Config *config)
+void _UART_SetConfig(const UART_Config *config)
 {
   K_U32 divisor;
   if (!config) return;

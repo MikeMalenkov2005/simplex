@@ -33,3 +33,22 @@ int UART_TxChar(int ch)
   return -(sys_send(&packet, UART) == -1 || !packet.Data.Size);
 }
 
+int UART_GetConfig(int *rate, int *line)
+{
+  UART_Packet packet = { UART_GET_CONFIG };
+  if (UART == -1 && (UART = DM_Wait("UART", 128)) == -1) return -1;
+  if (sys_send(&packet, UART) == -1) return -1;
+  if (rate) *rate = packet.Config.BaudRate;
+  if (line) *line = packet.Config.LineControl;
+  return 0;
+}
+
+int UART_SetConfig(int rate, int line)
+{
+  UART_Packet packet = { UART_GET_CONFIG };
+  if (UART == -1 && (UART = DM_Wait("UART", 128)) == -1) return -1;
+  packet.Config.BaudRate = rate;
+  packet.Config.LineControl = line;
+  return -(sys_send(&packet, UART) == -1);
+}
+

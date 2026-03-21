@@ -67,5 +67,19 @@ int UART_RxChar(void);
  */
 int UART_TxChar(int ch);
 
+/**
+ * @param rate A pointer to the place where the baud rate will be stored.
+ * @param line A pointer to the place where the line control will be stored.
+ * @return 0 on success or -1 on failure.
+ */
+int UART_GetConfig(int *rate, int *line);
+
+/**
+ * @param rate The baud rate to be set.
+ * @param line The line control to be set.
+ * @return 0 on success or -1 on failure.
+ */
+int UART_SetConfig(int rate, int line);
+
 #endif
 
