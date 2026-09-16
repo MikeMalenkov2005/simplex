@@ -19,5 +19,5 @@ $(ASMOBJ): %.o: %.asm
 	$(ELFASM) -o $@ $<
 
 clean:
-	rm *.o arch/*/*.o $(KERNEL_FILE)
+	$(RM) *.o arch/*/*.o $(KERNEL_FILE)
 

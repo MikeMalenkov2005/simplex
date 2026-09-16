@@ -5,7 +5,7 @@ OBJECTS = $(patsubst %.c,%.o,$(SOURCES))
 
 #### TARGET CONFIG ####
 
-ARCH = x86
+ARCH ?= x86
 
 KERNEL_NAME = simplex
 KERNEL_VERSION = 0.1
@@ -33,4 +33,12 @@ ARFLAGS = rcs
 include $(ROOTDIR)/config/$(ARCH).mk
 
 MODULE_FILES = $(patsubst %,$(ROOTDIR)/%.sys,$(MODULES))
+
+#### PLATFORM COMMANDS ####
+
+ifeq ($(OS),Windows_NT)
+RM = del
+else
+RM = rm
+endif
 

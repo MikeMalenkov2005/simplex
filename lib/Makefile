@@ -18,5 +18,5 @@ $(ASMOBJ): %.o: %.asm
 	$(ELFASM) -o $@ $<
 
 clean:
-	rm *.o arch/*/*.o $(LIB_FILE)
+	$(RM) *.o arch/*/*.o $(LIB_FILE)
 
