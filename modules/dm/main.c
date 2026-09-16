@@ -1,5 +1,6 @@
 #include <string.h>
 #include <simplex.h>
+#include <sys/task.h>
 #include <drv/dm.h>
 
 #define NAME_SIZE (K_MESSAGE_SIZE - 1)
@@ -30,7 +31,8 @@ int main(void)
   for (i = 0; i < MAX_TASKS; ++i) tasks[i] = -1;
   while ((tid = sys_wait(&packet)) != -1) 
   {
-    switch (packet.Command)
+    i = sys_check(tid);
+    if (~i && (i & TASK_MODULE)) switch (packet.Command)
     {
     case DM_FIND:
       i = find(packet.String + 1);
