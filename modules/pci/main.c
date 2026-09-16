@@ -2,6 +2,7 @@
 
 #include <drv/dm.h>
 #include <drv/uart.h>
+#include <sys/task.h>
 #include <simplex.h>
 
 #define logch UART_TxChar
@@ -65,14 +66,15 @@ static void PCI_FilterDevice(K_U32 device, K_HANDLE context)
 
 int main(void)
 {
+  int tid, flags;
   PCI_Packet packet;
-  int tid;
   if (!DM_Register("PCI")) return 1;
   PCI_ScanDevices();
   PCI_EnumerateDevices(logdev, NULL);
   while ((tid = sys_wait(&packet)) != -1)
   {
-    switch (packet.Command)
+    flags = sys_check(tid);
+    if (~flags && (flags & TASK_MODULE)) switch (packet.Command)
     {
     case PCI_READ_CONFIG:
       packet.Config = PCI_ReadConfig(packet.Device, packet.Offset);
